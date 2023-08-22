@@ -3,6 +3,7 @@ import { Enemy } from "./Enemy";
 import { Direction } from "./types";
 import { Level, TileType } from "./Level";
 import { SPRITE_PATH, TILE_SIZE } from "./constants";
+import { compareCoordinates } from "./utils";
 
 // enum TileType {
 //   None,
@@ -66,7 +67,7 @@ const tiles = [
   ],
 ];
 
-const level = new Level(tiles);
+const level = new Level(tiles, { x: 1, y: 0 }, { x: 6, y: 1 });
 
 let app = new PIXI.Application({
   width: tiles[0].length * TILE_SIZE,
@@ -99,17 +100,25 @@ for (const y in tiles) {
   }
 }
 
-const enemies = [new Enemy({ x: 1, y: 0 }, Direction.Down)];
-for (const enemy of enemies) {
-  app.stage.addChild(enemy.sprite);
-}
+let enemies: Enemy[] = [];
 
 let elapsed = 0.0;
 app.ticker.add((delta) => {
   elapsed += delta;
 
+  if (Math.round(elapsed % 100) === 0) {
+    const newEnemy = new Enemy(level.startCoordinates, Direction.Down);
+    enemies.push(newEnemy);
+    app.stage.addChild(newEnemy.sprite);
+  }
+
   for (const enemy of enemies) {
     enemy.tick(delta);
+
+    if (compareCoordinates(enemy.coordinates, level.endCoordinates)) {
+      enemy.finished();
+      enemies = enemies.filter(({ id }) => id !== enemy.id);
+    }
 
     if (!enemy.targetCoordinates) {
       const next = level.findPath(enemy.coordinates, enemy.previousCoordinates);

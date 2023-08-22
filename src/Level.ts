@@ -1,4 +1,5 @@
 import { Coordinates, Direction } from "./types";
+import { compareCoordinates } from "./utils";
 
 export enum TileType {
   None,
@@ -8,10 +9,18 @@ export enum TileType {
 export type TileMap = Array<TileType[]>;
 
 export class Level {
+  startCoordinates: Coordinates;
+  endCoordinates: Coordinates;
   private tileMap: TileMap;
 
-  constructor(map: TileMap) {
+  constructor(
+    map: TileMap,
+    startCoordinates: Coordinates,
+    endCoordinates: Coordinates,
+  ) {
     this.tileMap = map;
+    this.startCoordinates = startCoordinates;
+    this.endCoordinates = endCoordinates;
   }
 
   getTile(coordinates: Coordinates) {
@@ -28,8 +37,8 @@ export class Level {
     const right = this.findPathRight(currentCoordinates);
     if (right) {
       if (
-        !(right.coordinates.x === ignoreCoordinates?.x &&
-          right.coordinates.y === ignoreCoordinates?.y)
+        !ignoreCoordinates ||
+        !(compareCoordinates(right.coordinates, ignoreCoordinates))
       ) {
         return right;
       }
@@ -38,8 +47,8 @@ export class Level {
     const down = this.findPathDown(currentCoordinates);
     if (down) {
       if (
-        !(down.coordinates.x === ignoreCoordinates?.x &&
-          down.coordinates.y === ignoreCoordinates?.y)
+        !ignoreCoordinates ||
+        !(compareCoordinates(down.coordinates, ignoreCoordinates))
       ) {
         return down;
       }
@@ -48,8 +57,8 @@ export class Level {
     const left = this.findPathLeft(currentCoordinates);
     if (left) {
       if (
-        !(left.coordinates.x === ignoreCoordinates?.x &&
-          left.coordinates.y === ignoreCoordinates?.y)
+        !ignoreCoordinates ||
+        !(compareCoordinates(left.coordinates, ignoreCoordinates))
       ) {
         return left;
       }
@@ -58,8 +67,8 @@ export class Level {
     const up = this.findPathUp(currentCoordinates);
     if (up) {
       if (
-        !(up.coordinates.x === ignoreCoordinates?.x &&
-          up.coordinates.y === ignoreCoordinates?.y)
+        !ignoreCoordinates ||
+        !(compareCoordinates(up.coordinates, ignoreCoordinates))
       ) {
         return up;
       }

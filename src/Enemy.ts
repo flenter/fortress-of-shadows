@@ -5,7 +5,10 @@ import { SPRITE_PATH, TILE_SIZE } from "./constants";
 
 const SPEED = 0.1;
 
+let id = 0;
+
 export class Enemy {
+  id: number;
   previousCoordinates: Coordinates | undefined;
   coordinates: Coordinates;
   targetCoordinates: Coordinates | undefined;
@@ -13,6 +16,7 @@ export class Enemy {
   sprite: PIXI.Sprite;
 
   constructor(coordinates: Coordinates, direction: Direction) {
+    this.id = id++;
     this.coordinates = coordinates;
     this.targetCoordinates = coordinates;
     this.direction = direction;
@@ -53,5 +57,9 @@ export class Enemy {
     this.previousCoordinates = this.coordinates;
     this.targetCoordinates = nextCoordinates;
     this.direction = nextDirection;
+  }
+
+  finished() {
+    this.sprite.removeFromParent();
   }
 }
