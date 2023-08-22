@@ -23,25 +23,46 @@ export class Level {
 
   findPath(
     currentCoordinates: Coordinates,
+    ignoreCoordinates?: Coordinates,
   ): { coordinates: Coordinates; direction: Direction } | undefined {
     const right = this.findPathRight(currentCoordinates);
     if (right) {
-      return right;
+      if (
+        !(right.coordinates.x === ignoreCoordinates?.x &&
+          right.coordinates.y === ignoreCoordinates?.y)
+      ) {
+        return right;
+      }
     }
 
     const down = this.findPathDown(currentCoordinates);
     if (down) {
-      return down;
+      if (
+        !(down.coordinates.x === ignoreCoordinates?.x &&
+          down.coordinates.y === ignoreCoordinates?.y)
+      ) {
+        return down;
+      }
     }
 
     const left = this.findPathLeft(currentCoordinates);
     if (left) {
-      return left;
+      if (
+        !(left.coordinates.x === ignoreCoordinates?.x &&
+          left.coordinates.y === ignoreCoordinates?.y)
+      ) {
+        return left;
+      }
     }
 
     const up = this.findPathUp(currentCoordinates);
     if (up) {
-      return up;
+      if (
+        !(up.coordinates.x === ignoreCoordinates?.x &&
+          up.coordinates.y === ignoreCoordinates?.y)
+      ) {
+        return up;
+      }
     }
   }
 

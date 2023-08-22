@@ -6,50 +6,52 @@ import { SPRITE_PATH, TILE_SIZE } from "./constants";
 const SPEED = 0.1;
 
 export class Enemy {
-  position: Coordinates;
-  nextPosition: Coordinates | undefined;
+  previousCoordinates: Coordinates | undefined;
+  coordinates: Coordinates;
+  targetCoordinates: Coordinates | undefined;
   direction: Direction;
-  nextDirection: Direction | undefined;
   sprite: PIXI.Sprite;
 
-  constructor(position: Coordinates, direction: Direction) {
-    this.position = position;
+  constructor(coordinates: Coordinates, direction: Direction) {
+    this.coordinates = coordinates;
+    this.targetCoordinates = coordinates;
     this.direction = direction;
 
-    this.sprite = PIXI.Sprite.from(SPRITE_PATH + "towerDefense_tile246.png");
+    this.sprite = PIXI.Sprite.from(SPRITE_PATH + "towerDefense_tile245.png");
     this.sprite.width = TILE_SIZE;
     this.sprite.height = TILE_SIZE;
-    this.sprite.x = this.position.x * TILE_SIZE;
-    this.sprite.y = this.position.y * TILE_SIZE;
+    this.sprite.x = this.coordinates.x * TILE_SIZE;
+    this.sprite.y = this.coordinates.y * TILE_SIZE;
   }
 
   tick(_delta: number) {
-    if (this.nextPosition) {
+    if (this.targetCoordinates) {
       this.sprite.x = lerp(
         this.sprite.x,
-        this.nextPosition.x * TILE_SIZE,
+        this.targetCoordinates.x * TILE_SIZE,
         SPEED,
       );
 
       this.sprite.y = lerp(
         this.sprite.y,
-        this.nextPosition.y * TILE_SIZE,
+        this.targetCoordinates.y * TILE_SIZE,
         SPEED,
       );
 
       if (
-        Math.round(this.sprite.x) === this.nextPosition.x * TILE_SIZE &&
-        Math.round(this.sprite.y) === this.nextPosition.y * TILE_SIZE
+        Math.round(this.sprite.x) === this.targetCoordinates.x * TILE_SIZE &&
+        Math.round(this.sprite.y) === this.targetCoordinates.y * TILE_SIZE
       ) {
-        console.log("arrived");
-        this.position = this.nextPosition;
-        this.nextPosition = undefined;
+        this.previousCoordinates = this.coordinates;
+        this.coordinates = this.targetCoordinates;
+        this.targetCoordinates = undefined;
       }
     }
   }
 
-  setNextPosition(position: Coordinates, direction: Direction) {
-    this.nextPosition = position;
-    this.nextDirection = direction;
+  setNextPosition(nextCoordinates: Coordinates, nextDirection: Direction) {
+    this.previousCoordinates = this.coordinates;
+    this.targetCoordinates = nextCoordinates;
+    this.direction = nextDirection;
   }
 }
