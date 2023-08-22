@@ -1,11 +1,14 @@
 import * as PIXI from "pixi.js";
+import { Enemy } from "./Enemy";
+import { Direction } from "./types";
+import { lerp } from "./utils";
+import { Level, TileType } from "./Level";
+import { SPRITE_PATH, TILE_SIZE } from "./constants";
 
-const TILE_SIZE = 40;
-
-enum TileType {
-  None,
-  Path,
-}
+// enum TileType {
+//   None,
+//   Path,
+// }
 
 const tiles = [
   [
@@ -64,12 +67,12 @@ const tiles = [
   ],
 ];
 
+const level = new Level(tiles);
+
 let app = new PIXI.Application({
   width: tiles[0].length * TILE_SIZE,
   height: tiles.length * TILE_SIZE,
 });
-
-const SPRITE_PATH = "/assets/PNG/Retina/";
 
 function getTileSpritePath(tileInfo: TileType): string {
   switch (tileInfo) {
@@ -105,81 +108,96 @@ enemy.y = 0;
 
 app.stage.addChild(enemy);
 
-document.body.appendChild(app.view);
-
-type Coords = { x: number; y: number };
-
-function findPath(current: Coords): Coords {
-  const y = tiles[current.y];
-  if (y) {
-    const tileRight = y[current.x + 1];
-    if (tileRight === TileType.Path) {
-      console.log("right!");
-      const next = { x: current.x + 1, y: current.y };
-      return next;
-    }
-    const tileLeft = y[current.y - 1];
-    if (tileLeft === TileType.Path) {
-      console.log("left!");
-      const next = { x: current.x - 1, y: current.y };
-      return next;
-    }
-  }
-
-  const bottomY = tiles[current.y + 1];
-  if (bottomY) {
-    const tileBottom = bottomY[current.x];
-    if (tileBottom === TileType.Path) {
-      console.log("bottom!");
-      const next = { x: current.x, y: current.y + 1 };
-      return next;
-    }
-  }
-
-  const topY = tiles[current.y - 1];
-  if (topY) {
-    const tileTop = topY[current.x];
-    if (tileTop === TileType.Path) {
-      console.log("top!");
-      const next = { x: current.x, y: current.y - 1 };
-      return next;
-    }
-  }
-
-  console.log("none");
-
-  return current;
+const enemies = [new Enemy({ x: 1, y: 0 }, Direction.Down)];
+for (const enemy of enemies) {
+  app.stage.addChild(enemy.sprite);
 }
 
-let enemyCoords: Coords = { x: 1, y: 0 };
+document.body.appendChild(app.view);
+
+// type Coords = { x: number; y: number };
+//
+// function findPath(current: Coords): Coords {
+//   const y = tiles[current.y];
+//   if (y) {
+//     const tileRight = y[current.x + 1];
+//     if (tileRight === TileType.Path) {
+//       console.log("right!");
+//       const next = { x: current.x + 1, y: current.y };
+//       return next;
+//     }
+//     const tileLeft = y[current.y - 1];
+//     if (tileLeft === TileType.Path) {
+//       console.log("left!");
+//       const next = { x: current.x - 1, y: current.y };
+//       return next;
+//     }
+//   }
+//
+//   const bottomY = tiles[current.y + 1];
+//   if (bottomY) {
+//     const tileBottom = bottomY[current.x];
+//     if (tileBottom === TileType.Path) {
+//       console.log("bottom!");
+//       const next = { x: current.x, y: current.y + 1 };
+//       return next;
+//     }
+//   }
+//
+//   const topY = tiles[current.y - 1];
+//   if (topY) {
+//     const tileTop = topY[current.x];
+//     if (tileTop === TileType.Path) {
+//       console.log("top!");
+//       const next = { x: current.x, y: current.y - 1 };
+//       return next;
+//     }
+//   }
+//
+//   console.log("none");
+//
+//   return current;
+// }
+//
+// let enemyCoords: Coords = { x: 1, y: 0 };
 
 let elapsed = 0.0;
 app.ticker.add((delta) => {
   elapsed += delta;
-  if (
-    Math.round(enemy.x) === enemyCoords.x * TILE_SIZE &&
-    Math.round(enemy.y) === enemyCoords.y * TILE_SIZE
-  ) {
-    console.log("REACHED");
-    const goal = findPath(
-      { x: enemyCoords.x, y: enemyCoords.y },
-    );
-    console.log(
-      `x: ${enemy.x} -> ${goal.x * TILE_SIZE}`,
-      `y: ${enemy.y} -> ${goal.y * TILE_SIZE}`,
-    );
-    enemyCoords = goal;
+  // if (
+  //   Math.round(enemy.x) === enemyCoords.x * TILE_SIZE &&
+  //   Math.round(enemy.y) === enemyCoords.y * TILE_SIZE
+  // ) {
+  //   console.log("REACHED");
+  //   const goal = findPath(
+  //     { x: enemyCoords.x, y: enemyCoords.y },
+  //   );
+  //   console.log(
+  //     `x: ${enemy.x} -> ${goal.x * TILE_SIZE}`,
+  //     `y: ${enemy.y} -> ${goal.y * TILE_SIZE}`,
+  //   );
+  //   enemyCoords = goal;
+  // }
+  //
+  // console.log(enemy.x, enemy.y, enemyCoords);
+  //
+  // enemy.x = lerp(enemy.x, enemyCoords.x * TILE_SIZE, 0.25);
+  // enemy.y = lerp(enemy.y, enemyCoords.y * TILE_SIZE, 0.25);
+
+  for (const enemy of enemies) {
+    enemy.tick(delta);
+
+    if (!enemy.nextPosition) {
+      const next = level.findPath(enemy.position);
+
+      if (next) {
+        const { coordinates: nextCoordinates, direction: nextDirection } = next;
+
+        enemy.setNextPosition(nextCoordinates, nextDirection);
+      }
+    }
   }
-
-  console.log(enemy.x, enemy.y, enemyCoords);
-
-  enemy.x = lerp(enemy.x, enemyCoords.x * TILE_SIZE, 0.25);
-  enemy.y = lerp(enemy.y, enemyCoords.y * TILE_SIZE, 0.25);
 });
-
-function lerp(start: number, end: number, amt: number) {
-  return (1 - amt) * start + amt * end;
-}
 
 // import "./style.css";
 // import typescriptLogo from "./typescript.svg";
