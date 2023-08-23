@@ -5,11 +5,6 @@ import { Level, TileType } from "./Level";
 import { SPRITE_PATH, TILE_SIZE } from "./constants";
 import { compareCoordinates } from "./utils";
 
-// enum TileType {
-//   None,
-//   Path,
-// }
-
 const tiles = [
   [
     TileType.None,
