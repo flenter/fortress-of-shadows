@@ -1,16 +1,18 @@
 import { Coordinates, Direction } from "./types";
 import * as PIXI from "pixi.js";
 import { TILE_SIZE } from "./constants";
+import { VisualElement } from "./VisualElement";
 
 let id = 0;
 
-export class Enemy {
+export class Enemy implements VisualElement{
   id: number;
   previousCoordinates: Coordinates | undefined;
   coordinates: Coordinates;
   targetCoordinates: Coordinates | undefined;
   direction: Direction;
-  sprite: PIXI.AnimatedSprite;
+  sprite: VisualElement["sprite"];
+  monster: PIXI.AnimatedSprite;
   text: PIXI.Text;
   speed = 1;
 
@@ -23,17 +25,26 @@ export class Enemy {
 
     const { data } = PIXI.Assets.cache.get("/assets/assets.json");
     const { animations } = data;
-    this.sprite = PIXI.AnimatedSprite.fromFrames(
+    this.sprite = new PIXI.Container();
+    this.monster = PIXI.AnimatedSprite.fromFrames(
       animations["big_demon_run_anim_f"],
     );
-    this.sprite.play();
+    this.sprite.addChild(this.monster);
+    this.sprite.addChild(this.text);
+    this.monster.play();
     const { x, y } = this.translateToScreenCoordinates(this.coordinates);
     this.sprite.x = x;
     this.sprite.y = y;
-    this.sprite.animationSpeed = 0.2;
-    this.text.x = x;
-    this.text.y = y;
+    // this.monster.x = x;
+    // this.monster.y = y;
+    this.monster.animationSpeed = 0.2;
+    // this.text.x = x;
+    // this.text.y = y;
     this.sprite.zIndex = coordinates.y;
+  }
+
+  initSprite() {
+
   }
 
   translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
@@ -74,8 +85,8 @@ export class Enemy {
         }
       }
 
-      this.text.x = this.sprite.x;
-      this.text.y = this.sprite.y;
+      // this.text.x = this.sprite.x;
+      // this.text.y = this.sprite.y;
 
       if (
         Math.round(this.sprite.x) === targetX &&
