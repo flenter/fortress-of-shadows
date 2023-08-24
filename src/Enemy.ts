@@ -2,8 +2,6 @@ import { Coordinates, Direction } from "./types";
 import * as PIXI from "pixi.js";
 import { TILE_SIZE } from "./constants";
 
-// const SPEED = 0.1;
-
 let id = 0;
 
 export class Enemy {
@@ -12,7 +10,8 @@ export class Enemy {
   coordinates: Coordinates;
   targetCoordinates: Coordinates | undefined;
   direction: Direction;
-  sprite: PIXI.AnimatedSprite;
+  sprite: PIXI.Sprite;
+  text: PIXI.Text;
   speed = 1;
 
   constructor(coordinates: Coordinates, direction: Direction) {
@@ -20,6 +19,7 @@ export class Enemy {
     this.coordinates = coordinates;
     this.targetCoordinates = coordinates;
     this.direction = direction;
+    this.text = new PIXI.Text(String(this.id));
 
     const { data } = PIXI.Assets.cache.get("/assets/assets.json");
     const { animations } = data;
@@ -31,6 +31,8 @@ export class Enemy {
     this.sprite.x = x;
     this.sprite.y = y;
     this.sprite.animationSpeed = 0.1;
+    this.text.x = x;
+    this.text.y = y;
   }
 
   translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
@@ -67,6 +69,9 @@ export class Enemy {
         }
       }
 
+      this.text.x = this.sprite.x;
+      this.text.y = this.sprite.y;
+
       if (
         Math.round(this.sprite.x) === targetX &&
         Math.round(this.sprite.y) === targetY
@@ -86,5 +91,6 @@ export class Enemy {
 
   finished() {
     this.sprite.removeFromParent();
+    this.text.removeFromParent();
   }
 }
