@@ -4,6 +4,8 @@ import { TILE_SIZE } from "./constants";
 
 let id = 0;
 
+type EnemyState = "walking" | "dead" | "finished";
+
 export class Enemy {
   id: number;
   previousCoordinates: Coordinates | undefined;
@@ -14,8 +16,11 @@ export class Enemy {
   private text: PIXI.Text;
   speed = 1;
   sprite: PIXI.Container<PIXI.DisplayObject>;
+  state: EnemyState;
 
   constructor(coordinates: Coordinates, direction: Direction) {
+    this.state = "walking";
+
     this.sprite = new PIXI.Container();
 
     this.id = id++;
@@ -38,11 +43,10 @@ export class Enemy {
     this.text.y = y;
     this.character.zIndex = coordinates.y;
 
-    this.sprite.addChild(this.character);
-    this.sprite.addChild(this.text);
+    this.sprite.addChild(this.character, this.text);
   }
 
-  translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
+  private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
       x: coordinates.x * TILE_SIZE + 0.5 * TILE_SIZE -
         0.5 * this.character.width,
@@ -53,28 +57,28 @@ export class Enemy {
     };
   }
 
-  tick(_delta: number) {
+  tick(delta: number) {
     if (this.targetCoordinates) {
       const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
         this.targetCoordinates,
       );
       if (targetX > this.character.x) {
-        this.character.x += _delta * this.speed;
+        this.character.x += delta * this.speed;
         if (this.character.x > targetX) {
           this.character.x = targetX;
         }
       } else if (targetX < this.character.x) {
-        this.character.x -= _delta * this.speed;
+        this.character.x -= delta * this.speed;
         if (this.character.x < targetX) {
           this.character.x = targetX;
         }
       } else if (targetY > this.character.y) {
-        this.character.y += _delta * this.speed;
+        this.character.y += delta * this.speed;
         if (this.character.y > targetY) {
           this.character.y = targetY;
         }
       } else if (targetY < this.character.y) {
-        this.character.y -= _delta * this.speed;
+        this.character.y -= delta * this.speed;
         if (this.character.y < targetY) {
           this.character.y = targetY;
         }
@@ -101,10 +105,10 @@ export class Enemy {
   }
 
   finished() {
-    this.sprite.removeFromParent();
+    this.state = "finished";
   }
 
-  kill() {
-    this.finished();
+  damage() {
+    this.state = "dead";
   }
 }
