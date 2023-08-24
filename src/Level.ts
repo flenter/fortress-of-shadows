@@ -36,8 +36,8 @@ export class Level implements VisualElement {
     this.startCoordinates = startCoordinates;
     this.endCoordinates = endCoordinates;
     this.towers = [
-      new Tower({ x: 3, y: 2 }, this.kill.bind(this)),
-      new Tower({ x: 2, y: 4 }, this.kill.bind(this)),
+      new Tower({ x: 3, y: 2 }),
+      new Tower({ x: 2, y: 4 }),
     ];
     this.sprite = new Container();
     this.objectsContainer = new Container();

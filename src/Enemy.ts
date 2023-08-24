@@ -62,6 +62,8 @@ function getEnemy() {
   return stats[index];
 }
 
+type EnemyState = "walking" | "dead" | "finished";
+
 export class Enemy implements VisualElement {
   id: number;
   previousCoordinates: Coordinates | undefined;
@@ -69,12 +71,19 @@ export class Enemy implements VisualElement {
   targetCoordinates: Coordinates | undefined;
   direction: Direction;
   sprite: VisualElement["sprite"];
-  text: PIXI.Text;
   speed = 1;
   type: string;
+  private character: PIXI.AnimatedSprite;
+  private text: PIXI.Text;
+  state: EnemyState;
 
   constructor(coordinates: Coordinates, direction: Direction) {
+    this.state = "walking";
+
+    this.sprite = new PIXI.Container();
+
     this.id = id++;
+    console.log(coordinates, direction, Direction.Down)
     this.coordinates = coordinates;
     this.targetCoordinates = coordinates;
     this.direction = direction;
@@ -83,70 +92,65 @@ export class Enemy implements VisualElement {
     const stats = getEnemy();
     this.type = stats.name;
     this.speed = stats.speed;
+    const { data } = PIXI.Assets.cache.get("/assets/assets.json");
+    const { animations } = data;
+    const animation = animations[this.type];
+    this.character = PIXI.AnimatedSprite.fromFrames(animation);
     this.initSprite();
   }
 
   initSprite() {
-    const { data } = PIXI.Assets.cache.get("/assets/assets.json");
-    const { animations } = data;
-    const animation = animations[this.type];
-    if (!animation) {
-      debugger;
-    }
-
-    const monster = PIXI.AnimatedSprite.fromFrames(animation);
-    this.sprite.addChild(monster);
-    // this.sprite.addChild(this.text);
-    monster.play();
-    monster.animationSpeed = 0.15;
-    const { x, y } = this.translateToScreenCoordinates(this.coordinates);
+    this.sprite.addChild(this.character);
+    this.character.play();
+    this.character.animationSpeed = 0.15;
+    const { x, y } = this.translateToScreenCoordinates(this.targetCoordinates||this.coordinates);
     this.sprite.x = x;
     this.sprite.y = y;
     this.sprite.zIndex = this.coordinates.y;
   }
 
-  translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
+  private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
+    // console.log('go to ', coordinates)
     return {
-      x: coordinates.x * TILE_SIZE + 0.5 * TILE_SIZE - 0.5 * this.sprite.width,
-      y:
-        coordinates.y * TILE_SIZE +
-        0.5 * TILE_SIZE -
-        this.sprite.height +
+      x: coordinates.x * TILE_SIZE+
+        0.5 * this.sprite.width,
+      y: coordinates.y * TILE_SIZE +
+        // 0.5 * TILE_SIZE -
         0.5 * this.sprite.height -
         8,
     };
   }
 
-  tick(_delta: number) {
+  tick(delta: number) {
     if (this.targetCoordinates) {
       const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
         this.targetCoordinates,
       );
-      if (targetX > this.sprite.x) {
-        this.sprite.x += _delta * this.speed;
-        if (this.sprite.x > targetX) {
-          this.sprite.x = targetX;
+      if (targetX > this.character.x) {
+        this.character.x += delta * this.speed;
+        if (this.character.x > targetX) {
+          this.character.x = targetX;
         }
-      } else if (targetX < this.sprite.x) {
-        this.sprite.x -= _delta * this.speed;
-        if (this.sprite.x < targetX) {
-          this.sprite.x = targetX;
+      } else if (targetX < this.character.x) {
+        this.character.x -= delta * this.speed;
+        if (this.character.x < targetX) {
+          this.character.x = targetX;
         }
-      } else if (targetY > this.sprite.y) {
-        this.sprite.y += _delta * this.speed;
-        if (this.sprite.y > targetY) {
-          this.sprite.y = targetY;
+      } else if (targetY > this.character.y) {
+        this.character.y += delta * this.speed;
+        if (this.character.y > targetY) {
+          this.character.y = targetY;
         }
-      } else if (targetY < this.sprite.y) {
-        this.sprite.y -= _delta * this.speed;
-        if (this.sprite.y < targetY) {
-          this.sprite.y = targetY;
+      } else if (targetY < this.character.y) {
+        this.character.y -= delta * this.speed;
+        if (this.character.y < targetY) {
+          this.character.y = targetY;
         }
       }
 
       if (
-        Math.round(this.sprite.x) === targetX &&
-        Math.round(this.sprite.y) === targetY
+        Math.round(this.character.x) === targetX &&
+        Math.round(this.character.y) === targetY
       ) {
         this.previousCoordinates = this.coordinates;
         this.coordinates = this.targetCoordinates;
@@ -162,11 +166,10 @@ export class Enemy implements VisualElement {
   }
 
   finished() {
-    this.sprite.removeFromParent();
-    this.text.removeFromParent();
+    this.state = "finished";
   }
 
-  kill() {
-    this.finished();
+  damage() {
+    this.state = "dead";
   }
 }

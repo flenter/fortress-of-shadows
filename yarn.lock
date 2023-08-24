@@ -122,7 +122,7 @@
   resolved "https://registry.yarnpkg.com/@pixi/app/-/app-7.2.4.tgz#ae16fdc9fce04224fb36311168d902a2e7d0e65a"
   integrity sha512-eJ2jpu5P28ip07nLItw6sETXn45P4KR/leMJ6zPHRlhT1m8t5zTsWr3jK4Uj8LF2E+6KlPNzLQh5Alf/unn/aQ==
 
-"@pixi/assets@7.2.4":
+"@pixi/assets@7.2.4", "@pixi/assets@^7.0.0":
   version "7.2.4"
   resolved "https://registry.yarnpkg.com/@pixi/assets/-/assets-7.2.4.tgz#944f4a15acc888071c0811d3d68524afb0ed069c"
   integrity sha512-7199re3wvMAlVqXLaCyAr8IkJSXqkeVAxcYyB2rBu4Id5m2hhlGX1dQsdMBiCXLwu6/LLVqDvJggSNVQBzL6ZQ==
@@ -146,7 +146,7 @@
   resolved "https://registry.yarnpkg.com/@pixi/constants/-/constants-7.2.4.tgz#45c23b247309e78d4105f04063ad8b453dae8b2f"
   integrity sha512-hKuHBWR6N4Q0Sf5MGF3/9l+POg/G5rqhueHfzofiuelnKg7aBs3BVjjZ+6hZbd6M++vOUmxYelEX/NEFBxrheA==
 
-"@pixi/core@7.2.4":
+"@pixi/core@7.2.4", "@pixi/core@^7.0.0":
   version "7.2.4"
   resolved "https://registry.yarnpkg.com/@pixi/core/-/core-7.2.4.tgz#9f93a0744c795b17045127c2630f976580f03008"
   integrity sha512-0XtvrfxHlS2T+beBBSpo7GI8+QLyyTqMVQpNmPqB4woYxzrOEJ9JaUFBaBfCvycLeUkfVih1u6HAbtF+2d1EjQ==
@@ -269,6 +269,11 @@
     "@pixi/constants" "7.2.4"
     "@types/css-font-loading-module" "^0.0.7"
     ismobilejs "^1.1.0"
+
+"@pixi/sound@^5.2.1":
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/@pixi/sound/-/sound-5.2.1.tgz#9872a0e199a3c8021910f3f98acfcaa71c014bfc"
+  integrity sha512-QzopUO1kdn2b6s0LkLuQTWdxn2//Of0x944huDLT53oXMPtfnv9Df2qqZeOVZfjzVU05Q8dRqG171YcWMk1ltg==
 
 "@pixi/sprite-animated@7.2.4":
   version "7.2.4"

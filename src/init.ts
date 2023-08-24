@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 
-import { Level, TileType } from "./Level";
+import { Level } from "./Level";
 import { tiles } from "./main";
 
 export async function init(app: PIXI.Application<PIXI.ICanvas>) {
