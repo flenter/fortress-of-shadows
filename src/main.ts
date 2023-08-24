@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { init } from "./init";
 import { TileType } from "./Level";
 import { TILE_SIZE } from "./constants";
+import "./style.css";
 
 export const tiles = [
   [
@@ -65,7 +66,9 @@ let app = new PIXI.Application({
   height: tiles.length * TILE_SIZE,
 });
 
-document.body.appendChild(app.view);
+const container = document.getElementById("app");
+
+container?.appendChild(app.view);
 function setup() {
   init(app);
 }
