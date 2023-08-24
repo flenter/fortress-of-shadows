@@ -98,4 +98,8 @@ export class Enemy {
     this.sprite.removeFromParent();
     this.text.removeFromParent();
   }
+
+  kill() {
+    this.finished();
+  }
 }

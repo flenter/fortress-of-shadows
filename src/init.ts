@@ -15,18 +15,17 @@ function createMap(tiles: Array<Array<TileType>>) {
     for (const x of tiles[y].keys()) {
       const tile = tiles[y][x];
       const hasLeftNeighbor = x > 0 && tiles[y][x - 1] === TileType.Path;
-      const hasRightNeighbor =
-        x < tiles[y].length - 1 && tiles[y][x + 1] === TileType.Path;
+      const hasRightNeighbor = x < tiles[y].length - 1 &&
+        tiles[y][x + 1] === TileType.Path;
       const hasTopNeighbor = y > 0 && tiles[y - 1][x] === TileType.Path;
-      const hasBottomNeighbor =
-        y < tiles.length - 1 && tiles[y + 1][x] === TileType.Path;
-      const isStartFinish =
-        [
-          hasLeftNeighbor,
-          hasRightNeighbor,
-          hasTopNeighbor,
-          hasBottomNeighbor,
-        ].filter(Boolean).length === 1;
+      const hasBottomNeighbor = y < tiles.length - 1 &&
+        tiles[y + 1][x] === TileType.Path;
+      const isStartFinish = [
+        hasLeftNeighbor,
+        hasRightNeighbor,
+        hasTopNeighbor,
+        hasBottomNeighbor,
+      ].filter(Boolean).length === 1;
 
       const tileX = x * TILE_SIZE;
       const tileY = y * TILE_SIZE;
@@ -117,15 +116,25 @@ function createMap(tiles: Array<Array<TileType>>) {
       map.tile(image, tileX + 32, tileY + 32);
     }
   }
- return map;
+  return map;
 }
-
 
 export async function init(app: PIXI.Application<PIXI.ICanvas>) {
   const level = new Level(tiles, { x: 1, y: 0 }, { x: 6, y: 1 });
+
+  let enemies: Enemy[] = [];
+  const kill = (enemy: Enemy) => {
+    const targetIndex = enemies.findIndex(({ id }) => enemy.id === id);
+
+    if (targetIndex !== undefined) {
+      enemies[targetIndex].kill();
+      enemies.splice(targetIndex, 1);
+    }
+  };
+
   const towers = [
-    new Tower({ x: 3, y: 2 }), 
-    new Tower({ x: 2, y: 4 }),
+    new Tower({ x: 3, y: 2 }, kill),
+    new Tower({ x: 2, y: 4 }, kill),
   ];
 
   await PIXI.Assets.load("/assets/assets.json");
@@ -136,7 +145,7 @@ export async function init(app: PIXI.Application<PIXI.ICanvas>) {
   app.stage.addChild(units);
   // units.sortChildren = true;
   for (const tower of towers) {
-    const {textures } = PIXI.Assets.cache.get("/assets/assets.json");
+    const { textures } = PIXI.Assets.cache.get("/assets/assets.json");
     const sprite = PIXI.Sprite.from(textures["towerRound_sampleF_N.png"]);
     const MAX_WIDTH = TILE_SIZE * 0.75;
     sprite.height = sprite.height * (MAX_WIDTH / sprite.width);
@@ -148,8 +157,6 @@ export async function init(app: PIXI.Application<PIXI.ICanvas>) {
     units.addChild(sprite);
     units.addChild(tower.text);
   }
-
-  let enemies: Enemy[] = [];
 
   let elapsed = 0.0;
   app.ticker.add((delta) => {
