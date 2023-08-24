@@ -170,7 +170,6 @@ export async function init(app: PIXI.Application<PIXI.ICanvas>) {
       const newEnemy = new Enemy(level.startCoordinates, Direction.Down);
       enemies.push(newEnemy);
       units.addChild(newEnemy.sprite);
-      units.addChild(newEnemy.text);
     }
 
     for (const enemy of enemies) {
