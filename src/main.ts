@@ -1,12 +1,9 @@
 import * as PIXI from "pixi.js";
-import { Enemy } from "./Enemy";
-import { Direction } from "./types";
-import { Level, TileType } from "./Level";
-import { SPRITE_PATH, TILE_SIZE } from "./constants";
-import { compareCoordinates } from "./utils";
-import { Tower } from "./Tower";
+import { init } from "./init";
+import { TileType } from "./Level";
+import { TILE_SIZE } from "./constants";
 
-const tiles = [
+export const tiles = [
   [
     TileType.None,
     TileType.Path,
@@ -63,89 +60,17 @@ const tiles = [
   ],
 ];
 
-const towers = [new Tower({ x: 3, y: 2 }), new Tower({ x: 2, y: 4 })];
-
-const level = new Level(tiles, { x: 1, y: 0 }, { x: 6, y: 1 });
-
 let app = new PIXI.Application({
   width: tiles[0].length * TILE_SIZE,
   height: tiles.length * TILE_SIZE,
 });
 
-function getTileSpritePath(tileInfo: TileType): string {
-  switch (tileInfo) {
-    case TileType.None:
-      return SPRITE_PATH + "towerDefense_tile157.png";
-    case TileType.Path:
-      return SPRITE_PATH + "towerDefense_tile159.png";
-  }
-}
-
-for (const y in tiles) {
-  for (const x in tiles[y]) {
-    const tile = tiles[y][x];
-    const spritePath = getTileSpritePath(tile);
-    const sprite = PIXI.Sprite.from(spritePath);
-
-    sprite.width = TILE_SIZE;
-    sprite.height = TILE_SIZE;
-
-    sprite.x = Number.parseInt(x) * TILE_SIZE;
-    sprite.y = Number.parseInt(y) * TILE_SIZE;
-
-    app.stage.addChild(sprite);
-  }
-}
-
-for (const tower of towers) {
-  const sprite = PIXI.Sprite.from(SPRITE_PATH + "towerDefense_tile228.png");
-  sprite.width = TILE_SIZE;
-  sprite.height = TILE_SIZE;
-  sprite.x = tower.coordinates.x * TILE_SIZE;
-  sprite.y = tower.coordinates.y * TILE_SIZE;
-
-  app.stage.addChild(sprite);
-  app.stage.addChild(tower.text);
-}
-
-let enemies: Enemy[] = [];
-
-let elapsed = 0.0;
-app.ticker.add((delta) => {
-  elapsed += delta;
-
-  for (const tower of towers) {
-    tower.tick(delta, enemies);
-  }
-
-  if (Math.round(elapsed % 200) === 0) {
-    const newEnemy = new Enemy(level.startCoordinates, Direction.Down);
-    enemies.push(newEnemy);
-    app.stage.addChild(newEnemy.sprite);
-    app.stage.addChild(newEnemy.text);
-  }
-
-  for (const enemy of enemies) {
-    enemy.tick(delta);
-
-    if (compareCoordinates(enemy.coordinates, level.endCoordinates)) {
-      enemy.finished();
-      enemies = enemies.filter(({ id }) => id !== enemy.id);
-    }
-
-    if (!enemy.targetCoordinates) {
-      const next = level.findPath(enemy.coordinates, enemy.previousCoordinates);
-
-      if (next) {
-        const { coordinates: nextCoordinates, direction: nextDirection } = next;
-
-        enemy.setNextPosition(nextCoordinates, nextDirection);
-      }
-    }
-  }
-});
-
 document.body.appendChild(app.view);
+function setup() {
+  init(app);
+}
+
+setup();
 
 // import "./style.css";
 // import typescriptLogo from "./typescript.svg";

@@ -1,9 +1,6 @@
 import { Coordinates, Direction } from "./types";
 import * as PIXI from "pixi.js";
-import { lerp } from "./utils";
-import { SPRITE_PATH, TILE_SIZE } from "./constants";
-
-const SPEED = 0.1;
+import { TILE_SIZE } from "./constants";
 
 let id = 0;
 
@@ -15,6 +12,7 @@ export class Enemy {
   direction: Direction;
   sprite: PIXI.Sprite;
   text: PIXI.Text;
+  speed = 1;
 
   constructor(coordinates: Coordinates, direction: Direction) {
     this.id = id++;
@@ -23,32 +21,60 @@ export class Enemy {
     this.direction = direction;
     this.text = new PIXI.Text(String(this.id));
 
-    this.sprite = PIXI.Sprite.from(SPRITE_PATH + "towerDefense_tile245.png");
-    this.sprite.width = TILE_SIZE;
-    this.sprite.height = TILE_SIZE;
-    this.sprite.x = this.coordinates.x * TILE_SIZE;
-    this.sprite.y = this.coordinates.y * TILE_SIZE;
+    const { data } = PIXI.Assets.cache.get("/assets/assets.json");
+    const { animations } = data;
+    this.sprite = PIXI.AnimatedSprite.fromFrames(
+      animations["big_demon_run_anim_f"],
+    );
+    this.sprite.play();
+    const { x, y } = this.translateToScreenCoordinates(this.coordinates);
+    this.sprite.x = x;
+    this.sprite.y = y;
+    this.sprite.animationSpeed = 0.1;
+    this.text.x = x;
+    this.text.y = y;
+  }
+
+  translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
+    return {
+      x: coordinates.x * TILE_SIZE + 0.5 * TILE_SIZE,
+      y: coordinates.y * TILE_SIZE + 0.5 * TILE_SIZE,
+    };
   }
 
   tick(_delta: number) {
     if (this.targetCoordinates) {
-      this.sprite.x = lerp(
-        this.sprite.x,
-        this.targetCoordinates.x * TILE_SIZE,
-        SPEED,
+      const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
+        this.targetCoordinates,
       );
-      this.text.x = this.sprite.x;
+      if (targetX > this.sprite.x) {
+        this.sprite.x += _delta * this.speed;
+        if (this.sprite.x > targetX) {
+          this.sprite.x = targetX;
+        }
+      } else if (targetX < this.sprite.x) {
+        this.sprite.x -= _delta * this.speed;
+        if (this.sprite.x < targetX) {
+          this.sprite.x = targetX;
+        }
+      } else if (targetY > this.sprite.y) {
+        this.sprite.y += _delta * this.speed;
+        if (this.sprite.y > targetY) {
+          this.sprite.y = targetY;
+        }
+      } else if (targetY < this.sprite.y) {
+        this.sprite.y -= _delta * this.speed;
+        if (this.sprite.y < targetY) {
+          this.sprite.y = targetY;
+        }
+      }
 
-      this.sprite.y = lerp(
-        this.sprite.y,
-        this.targetCoordinates.y * TILE_SIZE,
-        SPEED,
-      );
+      this.text.x = this.sprite.x;
       this.text.y = this.sprite.y;
 
       if (
-        Math.round(this.sprite.x) === this.targetCoordinates.x * TILE_SIZE &&
-        Math.round(this.sprite.y) === this.targetCoordinates.y * TILE_SIZE
+        Math.round(this.sprite.x) === targetX &&
+        Math.round(this.sprite.y) === targetY
       ) {
         this.previousCoordinates = this.coordinates;
         this.coordinates = this.targetCoordinates;
