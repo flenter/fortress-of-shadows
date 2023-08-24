@@ -4,6 +4,7 @@ import { Direction } from "./types";
 import { Level, TileType } from "./Level";
 import { SPRITE_PATH, TILE_SIZE } from "./constants";
 import { compareCoordinates } from "./utils";
+import { Tower } from "./Tower";
 
 const tiles = [
   [
@@ -62,6 +63,8 @@ const tiles = [
   ],
 ];
 
+const towers = [new Tower({ x: 3, y: 2 }), new Tower({ x: 2, y: 4 })];
+
 const level = new Level(tiles, { x: 1, y: 0 }, { x: 6, y: 1 });
 
 let app = new PIXI.Application({
@@ -88,11 +91,21 @@ for (const y in tiles) {
     sprite.height = TILE_SIZE;
 
     sprite.x = Number.parseInt(x) * TILE_SIZE;
-
     sprite.y = Number.parseInt(y) * TILE_SIZE;
 
     app.stage.addChild(sprite);
   }
+}
+
+for (const tower of towers) {
+  const sprite = PIXI.Sprite.from(SPRITE_PATH + "towerDefense_tile228.png");
+  sprite.width = TILE_SIZE;
+  sprite.height = TILE_SIZE;
+  sprite.x = tower.coordinates.x * TILE_SIZE;
+  sprite.y = tower.coordinates.y * TILE_SIZE;
+
+  app.stage.addChild(sprite);
+  app.stage.addChild(tower.text);
 }
 
 let enemies: Enemy[] = [];
@@ -101,10 +114,15 @@ let elapsed = 0.0;
 app.ticker.add((delta) => {
   elapsed += delta;
 
-  if (Math.round(elapsed % 100) === 0) {
+  for (const tower of towers) {
+    tower.tick(delta, enemies);
+  }
+
+  if (Math.round(elapsed % 200) === 0) {
     const newEnemy = new Enemy(level.startCoordinates, Direction.Down);
     enemies.push(newEnemy);
     app.stage.addChild(newEnemy.sprite);
+    app.stage.addChild(newEnemy.text);
   }
 
   for (const enemy of enemies) {
