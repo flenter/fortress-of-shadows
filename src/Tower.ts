@@ -4,6 +4,9 @@ import { Coordinates } from "./types";
 import * as PIXI from "pixi.js";
 
 const RANGE = 1;
+const FIRING_RATE = 250;
+
+let elapsed = 0;
 
 export class Tower {
   coordinates: Coordinates;
@@ -20,13 +23,16 @@ export class Tower {
     this.kills = 0;
   }
 
-  tick(_delta: number, enemies: Enemy[]) {
+  tick(delta: number, enemies: Enemy[]) {
+    elapsed += delta;
+
     const target = this.findNearestTargetInRange(enemies);
     this.text.text = `Target: ${
       target?.id ?? "No Target"
     } \n Kills: ${this.kills}`;
 
-    if (target) {
+    const canFire = target && Math.round(elapsed % FIRING_RATE) === 0;
+    if (canFire) {
       this.fire(target);
     }
   }
@@ -35,7 +41,6 @@ export class Tower {
     const enemiesInRange = enemies.filter((enemy) => {
       const xDistance = Math.abs(enemy.coordinates.x - this.coordinates.x);
       const yDistance = Math.abs(enemy.coordinates.y - this.coordinates.y);
-      console.log(enemy.id, `x: ${xDistance}`, `y: ${yDistance}`);
 
       return xDistance <= RANGE && yDistance <= RANGE;
     });
