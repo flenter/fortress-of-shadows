@@ -38,7 +38,7 @@ export class Level {
     if (right) {
       if (
         !ignoreCoordinates ||
-        !(compareCoordinates(right.coordinates, ignoreCoordinates))
+        !compareCoordinates(right.coordinates, ignoreCoordinates)
       ) {
         return right;
       }
@@ -48,7 +48,7 @@ export class Level {
     if (down) {
       if (
         !ignoreCoordinates ||
-        !(compareCoordinates(down.coordinates, ignoreCoordinates))
+        !compareCoordinates(down.coordinates, ignoreCoordinates)
       ) {
         return down;
       }
@@ -58,7 +58,7 @@ export class Level {
     if (left) {
       if (
         !ignoreCoordinates ||
-        !(compareCoordinates(left.coordinates, ignoreCoordinates))
+        !compareCoordinates(left.coordinates, ignoreCoordinates)
       ) {
         return left;
       }
@@ -68,7 +68,7 @@ export class Level {
     if (up) {
       if (
         !ignoreCoordinates ||
-        !(compareCoordinates(up.coordinates, ignoreCoordinates))
+        !compareCoordinates(up.coordinates, ignoreCoordinates)
       ) {
         return up;
       }
