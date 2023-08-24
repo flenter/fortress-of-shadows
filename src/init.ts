@@ -155,7 +155,7 @@ export async function init(app: PIXI.Application<PIXI.ICanvas>) {
     elapsed += delta;
 
     for (const tower of towers) {
-      tower.tick(delta, enemies);
+      tower.tick(elapsed, enemies);
     }
 
     if (Math.round(elapsed % 100) === 0) {
