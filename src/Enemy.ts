@@ -10,7 +10,7 @@ export class Enemy {
   coordinates: Coordinates;
   targetCoordinates: Coordinates | undefined;
   direction: Direction;
-  sprite: PIXI.Sprite;
+  sprite: PIXI.AnimatedSprite;
   text: PIXI.Text;
   speed = 1;
 
@@ -30,15 +30,20 @@ export class Enemy {
     const { x, y } = this.translateToScreenCoordinates(this.coordinates);
     this.sprite.x = x;
     this.sprite.y = y;
-    this.sprite.animationSpeed = 0.1;
+    this.sprite.animationSpeed = 0.2;
     this.text.x = x;
     this.text.y = y;
+    this.sprite.zIndex = coordinates.y;
   }
 
   translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
-      x: coordinates.x * TILE_SIZE + 0.5 * TILE_SIZE,
-      y: coordinates.y * TILE_SIZE + 0.5 * TILE_SIZE,
+      x: coordinates.x * TILE_SIZE + 0.5 * TILE_SIZE - 0.5 * this.sprite.width,
+      y:
+        coordinates.y * TILE_SIZE +
+        0.5 * TILE_SIZE -
+        0.5 * this.sprite.height -
+        8,
     };
   }
 
