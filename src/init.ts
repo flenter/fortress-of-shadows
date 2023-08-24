@@ -123,18 +123,10 @@ export async function init(app: PIXI.Application<PIXI.ICanvas>) {
   const level = new Level(tiles, { x: 1, y: 0 }, { x: 6, y: 1 });
 
   let enemies: Enemy[] = [];
-  const kill = (enemy: Enemy) => {
-    const targetIndex = enemies.findIndex(({ id }) => enemy.id === id);
-
-    if (targetIndex !== undefined) {
-      enemies[targetIndex].kill();
-      enemies.splice(targetIndex, 1);
-    }
-  };
 
   const towers = [
-    new Tower({ x: 3, y: 2 }, kill),
-    new Tower({ x: 2, y: 4 }, kill),
+    new Tower({ x: 3, y: 2 }),
+    new Tower({ x: 2, y: 4 }),
   ];
 
   await PIXI.Assets.load("/assets/assets.json");
@@ -170,15 +162,19 @@ export async function init(app: PIXI.Application<PIXI.ICanvas>) {
       const newEnemy = new Enemy(level.startCoordinates, Direction.Down);
       enemies.push(newEnemy);
       units.addChild(newEnemy.sprite);
-      units.addChild(newEnemy.text);
     }
 
     for (const enemy of enemies) {
+      if (enemy.state === "dead" || enemy.state === "finished") {
+        units.removeChild(enemy.sprite);
+        enemies = enemies.filter(({ id }) => id !== enemy.id);
+        continue;
+      }
+
       enemy.tick(delta);
 
       if (compareCoordinates(enemy.coordinates, level.endCoordinates)) {
         enemy.finished();
-        enemies = enemies.filter(({ id }) => id !== enemy.id);
       }
 
       if (!enemy.targetCoordinates) {

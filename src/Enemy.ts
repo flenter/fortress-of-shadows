@@ -4,17 +4,25 @@ import { TILE_SIZE } from "./constants";
 
 let id = 0;
 
+type EnemyState = "walking" | "dead" | "finished";
+
 export class Enemy {
   id: number;
   previousCoordinates: Coordinates | undefined;
   coordinates: Coordinates;
   targetCoordinates: Coordinates | undefined;
   direction: Direction;
-  sprite: PIXI.AnimatedSprite;
-  text: PIXI.Text;
+  private character: PIXI.AnimatedSprite;
+  private text: PIXI.Text;
   speed = 1;
+  sprite: PIXI.Container<PIXI.DisplayObject>;
+  state: EnemyState;
 
   constructor(coordinates: Coordinates, direction: Direction) {
+    this.state = "walking";
+
+    this.sprite = new PIXI.Container();
+
     this.id = id++;
     this.coordinates = coordinates;
     this.targetCoordinates = coordinates;
@@ -23,63 +31,65 @@ export class Enemy {
 
     const { data } = PIXI.Assets.cache.get("/assets/assets.json");
     const { animations } = data;
-    this.sprite = PIXI.AnimatedSprite.fromFrames(
+    this.character = PIXI.AnimatedSprite.fromFrames(
       animations["big_demon_run_anim_f"],
     );
-    this.sprite.play();
+    this.character.play();
     const { x, y } = this.translateToScreenCoordinates(this.coordinates);
-    this.sprite.x = x;
-    this.sprite.y = y;
-    this.sprite.animationSpeed = 0.2;
+    this.character.x = x;
+    this.character.y = y;
+    this.character.animationSpeed = 0.2;
     this.text.x = x;
     this.text.y = y;
-    this.sprite.zIndex = coordinates.y;
+    this.character.zIndex = coordinates.y;
+
+    this.sprite.addChild(this.character, this.text);
   }
 
-  translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
+  private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
-      x: coordinates.x * TILE_SIZE + 0.5 * TILE_SIZE - 0.5 * this.sprite.width,
-      y:
-        coordinates.y * TILE_SIZE +
+      x: coordinates.x * TILE_SIZE + 0.5 * TILE_SIZE -
+        0.5 * this.character.width,
+      y: coordinates.y * TILE_SIZE +
         0.5 * TILE_SIZE -
-        0.5 * this.sprite.height -
+        0.5 * this.character.height -
         8,
     };
   }
 
-  tick(_delta: number) {
+  tick(delta: number) {
     if (this.targetCoordinates) {
       const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
         this.targetCoordinates,
       );
-      if (targetX > this.sprite.x) {
-        this.sprite.x += _delta * this.speed;
-        if (this.sprite.x > targetX) {
-          this.sprite.x = targetX;
+      if (targetX > this.character.x) {
+        this.character.x += delta * this.speed;
+        if (this.character.x > targetX) {
+          this.character.x = targetX;
         }
-      } else if (targetX < this.sprite.x) {
-        this.sprite.x -= _delta * this.speed;
-        if (this.sprite.x < targetX) {
-          this.sprite.x = targetX;
+      } else if (targetX < this.character.x) {
+        this.character.x -= delta * this.speed;
+        if (this.character.x < targetX) {
+          this.character.x = targetX;
         }
-      } else if (targetY > this.sprite.y) {
-        this.sprite.y += _delta * this.speed;
-        if (this.sprite.y > targetY) {
-          this.sprite.y = targetY;
+      } else if (targetY > this.character.y) {
+        this.character.y += delta * this.speed;
+        if (this.character.y > targetY) {
+          this.character.y = targetY;
         }
-      } else if (targetY < this.sprite.y) {
-        this.sprite.y -= _delta * this.speed;
-        if (this.sprite.y < targetY) {
-          this.sprite.y = targetY;
+      } else if (targetY < this.character.y) {
+        this.character.y -= delta * this.speed;
+        if (this.character.y < targetY) {
+          this.character.y = targetY;
         }
       }
 
-      this.text.x = this.sprite.x;
-      this.text.y = this.sprite.y;
+      this.text.x = this.character.x;
+      this.text.y = this.character.y;
 
       if (
-        Math.round(this.sprite.x) === targetX &&
-        Math.round(this.sprite.y) === targetY
+        Math.round(this.character.x) === targetX &&
+        Math.round(this.character.y) === targetY
       ) {
         this.previousCoordinates = this.coordinates;
         this.coordinates = this.targetCoordinates;
@@ -95,11 +105,10 @@ export class Enemy {
   }
 
   finished() {
-    this.sprite.removeFromParent();
-    this.text.removeFromParent();
+    this.state = "finished";
   }
 
-  kill() {
-    this.finished();
+  damage() {
+    this.state = "dead";
   }
 }
