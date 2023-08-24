@@ -1,7 +1,7 @@
 import { Application, Container, ICanvas, Texture } from "pixi.js";
 import { Coordinates, Direction } from "./types";
 import { compareCoordinates } from "./utils";
-import { VisualElement } from "./VisualElement"
+import { VisualElement } from "./VisualElement";
 import { TILE_SIZE } from "./constants";
 import { Tilemap } from "@pixi/tilemap";
 import { Tower } from "./Tower";
@@ -14,7 +14,7 @@ export enum TileType {
 
 export type TileMap = Array<TileType[]>;
 
-export class Level implements VisualElement{
+export class Level implements VisualElement {
   startCoordinates: Coordinates;
   endCoordinates: Coordinates;
   sprite: VisualElement["sprite"];
@@ -23,26 +23,25 @@ export class Level implements VisualElement{
   enemies: Array<Enemy> = [];
   private tileMap: TileMap;
   elapsed: number = 0.0;
-  app: Application<ICanvas>
+  app: Application<ICanvas>;
 
   constructor(
     map: TileMap,
     startCoordinates: Coordinates,
     endCoordinates: Coordinates,
-    app: Application<ICanvas>
+    app: Application<ICanvas>,
   ) {
     this.app = app;
     this.tileMap = map;
     this.startCoordinates = startCoordinates;
     this.endCoordinates = endCoordinates;
     this.towers = [
-      new Tower({ x: 3, y: 2 }, this.kill.bind(this)), 
+      new Tower({ x: 3, y: 2 }, this.kill.bind(this)),
       new Tower({ x: 2, y: 4 }, this.kill.bind(this)),
     ];
     this.sprite = new Container();
     this.objectsContainer = new Container();
     this.initSprite();
-    
   }
 
   kill(enemy: Enemy) {
@@ -52,8 +51,7 @@ export class Level implements VisualElement{
       this.enemies[targetIndex].kill();
       this.enemies.splice(targetIndex, 1);
     }
-  };
-
+  }
 
   initSprite() {
     const tilemap = createMapFromTiles(this.tileMap);
@@ -79,7 +77,6 @@ export class Level implements VisualElement{
     for (const tower of this.towers) {
       tower.tick(delta, this.enemies);
     }
-
 
     if (Math.round(this.elapsed % 100) === 0) {
       const newEnemy = new Enemy(this.startCoordinates, Direction.Down);
@@ -224,7 +221,6 @@ export class Level implements VisualElement{
   }
 }
 
-
 function createMapFromTiles(tiles: Array<Array<TileType>>) {
   const map = new Tilemap([Texture.from("grass.png")]);
   for (const y of tiles.keys()) {
@@ -333,5 +329,5 @@ function createMapFromTiles(tiles: Array<Array<TileType>>) {
       map.tile(image, tileX + 32, tileY + 32);
     }
   }
- return map;
+  return map;
 }

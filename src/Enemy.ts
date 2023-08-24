@@ -5,14 +5,13 @@ import { VisualElement } from "./VisualElement";
 
 let id = 0;
 
-export class Enemy implements VisualElement{
+export class Enemy implements VisualElement {
   id: number;
   previousCoordinates: Coordinates | undefined;
   coordinates: Coordinates;
   targetCoordinates: Coordinates | undefined;
   direction: Direction;
   sprite: VisualElement["sprite"];
-  monster: PIXI.AnimatedSprite;
   text: PIXI.Text;
   speed = 1;
 
@@ -22,28 +21,25 @@ export class Enemy implements VisualElement{
     this.targetCoordinates = coordinates;
     this.direction = direction;
     this.text = new PIXI.Text(String(this.id));
-
-    const { data } = PIXI.Assets.cache.get("/assets/assets.json");
-    const { animations } = data;
     this.sprite = new PIXI.Container();
-    this.monster = PIXI.AnimatedSprite.fromFrames(
-      animations["big_demon_run_anim_f"],
-    );
-    this.sprite.addChild(this.monster);
-    this.sprite.addChild(this.text);
-    this.monster.play();
-    const { x, y } = this.translateToScreenCoordinates(this.coordinates);
-    this.sprite.x = x;
-    this.sprite.y = y;
-    // this.monster.x = x;
-    // this.monster.y = y;
-    this.monster.animationSpeed = 0.2;
-    // this.text.x = x;
-    // this.text.y = y;
-    this.sprite.zIndex = coordinates.y;
+    this.initSprite();
   }
 
   initSprite() {
+    const { data } = PIXI.Assets.cache.get("/assets/assets.json");
+    const { animations } = data;
+    const monster = PIXI.AnimatedSprite.fromFrames(
+      animations["big_demon_run_anim_f"],
+    );
+    this.sprite.addChild(monster);
+    this.sprite.addChild(this.text);
+    monster.play();
+    monster.animationSpeed = 0.2;
+    const { x, y } = this.translateToScreenCoordinates(this.coordinates);
+    this.sprite.x = x;
+    this.sprite.y = y;
+    this.sprite.zIndex = this.coordinates.y;
+    this.text.y = -16;
 
   }
 
@@ -84,9 +80,6 @@ export class Enemy implements VisualElement{
           this.sprite.y = targetY;
         }
       }
-
-      // this.text.x = this.sprite.x;
-      // this.text.y = this.sprite.y;
 
       if (
         Math.round(this.sprite.x) === targetX &&

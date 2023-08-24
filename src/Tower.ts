@@ -11,46 +11,42 @@ let elapsed = 0;
 
 export class Tower implements VisualElement {
   coordinates: Coordinates;
+  sprite: PIXI.Sprite | PIXI.Container;
   text: PIXI.Text;
   kill: (enemy: Enemy) => void;
   kills: number;
-  sprite: PIXI.Sprite | PIXI.Container;
 
   constructor(coordinates: Coordinates, kill: (enemy: Enemy) => void) {
     this.coordinates = coordinates;
-    this.text = new PIXI.Text();
-    // this.text.x = coordinates.x * TILE_SIZE;
-    // this.text.y = coordinates.y * TILE_SIZE;
     this.kill = kill;
     this.kills = 0;
     this.sprite = new PIXI.Container();
+    this.text = new PIXI.Text();
     this.initSprite();
   }
 
-  initSprite()  {
-    const {textures } = PIXI.Assets.cache.get("/assets/assets.json");
+  initSprite() {
+    const { textures } = PIXI.Assets.cache.get("/assets/assets.json");
     const image = PIXI.Sprite.from(textures["towerRound_sampleF_N.png"]);
     const MAX_WIDTH = TILE_SIZE * 0.75;
     image.height = image.height * (MAX_WIDTH / image.width);
     image.width = MAX_WIDTH;
-    image.x = 0.5 * (TILE_SIZE - MAX_WIDTH)
-    // image.x = TILE_SIZE + 0.5 * (TILE_SIZE - MAX_WIDTH);
-    // image.y = TILE_SIZE - 0.5 * image.height;
+    image.x = 0.5 * (TILE_SIZE - MAX_WIDTH);
     image.zIndex = this.coordinates.y;
     this.text.zIndex = this.coordinates.y + 1;
     this.sprite.addChild(image);
     this.sprite.addChild(this.text);
-    this.sprite.x = this.coordinates.x * TILE_SIZE
-    this.sprite.y = this.coordinates.y * TILE_SIZE
+    this.sprite.x = this.coordinates.x * TILE_SIZE;
+    this.sprite.y = this.coordinates.y * TILE_SIZE;
   }
 
   tick(delta: number, enemies: Enemy[]) {
     elapsed += delta;
 
     const target = this.findNearestTargetInRange(enemies);
-    this.text.text = `Target: ${
-      target?.id ?? "No Target"
-    } \n Kills: ${this.kills}`;
+    this.text.text = `Target: ${target?.id ?? "No Target"} \n Kills: ${
+      this.kills
+    }`;
 
     const canFire = target && Math.round(elapsed % FIRING_RATE) === 0;
     if (canFire) {
