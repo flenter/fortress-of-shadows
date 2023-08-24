@@ -2,16 +2,18 @@ import { Enemy } from "./Enemy";
 import { TILE_SIZE } from "./constants";
 import { Coordinates } from "./types";
 import * as PIXI from "pixi.js";
+import { sound } from "@pixi/sound";
 
 const RANGE = 1;
 const FIRING_RATE = 250;
 
 let elapsed = 0;
 
+sound.add("fire", "/sounds/piew.wav");
+
 export class Tower {
   coordinates: Coordinates;
   text: PIXI.Text;
-  kill: (enemy: Enemy) => void;
   kills: number;
 
   constructor(coordinates: Coordinates) {
@@ -54,6 +56,7 @@ export class Tower {
   }
 
   private fire(target: Enemy) {
+    sound.play("fire");
     target.damage();
     this.kills++;
   }
