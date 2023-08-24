@@ -10,7 +10,21 @@ import { Tower } from "./Tower";
 
 export async function init(app: PIXI.Application<PIXI.ICanvas>) {
   const level = new Level(tiles, { x: 1, y: 0 }, { x: 6, y: 1 });
-  const towers = [new Tower({ x: 3, y: 2 }), new Tower({ x: 2, y: 4 })];
+
+  let enemies: Enemy[] = [];
+  const kill = (enemy: Enemy) => {
+    const targetIndex = enemies.findIndex(({ id }) => enemy.id === id);
+
+    if (targetIndex !== undefined) {
+      enemies[targetIndex].kill();
+      enemies.splice(targetIndex, 1);
+    }
+  };
+
+  const towers = [
+    new Tower({ x: 3, y: 2 }, kill),
+    new Tower({ x: 2, y: 4 }, kill),
+  ];
 
   await PIXI.Assets.load("/assets/assets.json");
 
@@ -40,8 +54,6 @@ export async function init(app: PIXI.Application<PIXI.ICanvas>) {
     app.stage.addChild(sprite);
     app.stage.addChild(tower.text);
   }
-
-  let enemies: Enemy[] = [];
 
   let elapsed = 0.0;
   app.ticker.add((delta) => {
