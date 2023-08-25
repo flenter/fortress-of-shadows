@@ -16,12 +16,15 @@
     "vite": "^4.4.5"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.4.1",
+    "@opentelemetry/exporter-prometheus": "^0.41.2",
     "@pixi/assets": "^7.0.0",
     "@pixi/core": "^7.0.0",
     "@pixi/filter-shockwave": "^5.1.1",
     "@pixi/sound": "^5.2.1",
     "@pixi/tilemap": "^4.0.0",
     "@pixi/utils": "^7.2.4",
+    "autometrics": "../autometrics-ts/packages/lib",
     "pixi.js": "^7.2.4"
   }
 }

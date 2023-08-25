@@ -1,15 +1,28 @@
+import { autometrics, init as initAutometrics } from "autometrics";
 import * as PIXI from "pixi.js";
 
 import { Level } from "./Level";
 import { tiles } from "./main";
 
-export async function init(app: PIXI.Application<PIXI.ICanvas>) {
-  await PIXI.Assets.load("/assets/assets.json");
-  const entry = { x: 1, y: 0 };
-  const exit = { x: 8, y: 4 };
-  const level = new Level(tiles, entry, exit, app);
-  const container = new PIXI.Container();
-  container.addChild(level.sprite);
-  app.stage.addChild(container);
-  level.start();
-}
+initAutometrics({
+  pushGateway: "http://127.0.0.1:6789/pushgateway/metrics/job/td",
+  buildInfo: {
+    version: import.meta.env.VITE_AUTOMETRICS_VERSION,
+    commit: import.meta.env.VITE_AUTOMETRICS_COMMIT,
+    branch: import.meta.env.VITE_AUTOMETRICS_BRANCH,
+  },
+});
+
+export const init = autometrics(
+  { moduleName: "init.ts", functionName: "init" },
+  async function init(app: PIXI.Application<PIXI.ICanvas>) {
+    await PIXI.Assets.load("/assets/assets.json");
+    const entry = { x: 1, y: 0 };
+    const exit = { x: 8, y: 4 };
+    const level = new Level(tiles, entry, exit, app);
+    const container = new PIXI.Container();
+    container.addChild(level.sprite);
+    app.stage.addChild(container);
+    level.start();
+  },
+);

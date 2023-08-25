@@ -4,6 +4,7 @@ import { TILE_SIZE } from "./constants";
 import { Coordinates } from "./types";
 import * as PIXI from "pixi.js";
 import { sound } from "@pixi/sound";
+import { autometrics } from "autometrics";
 import { EventEmitter } from "@pixi/utils";
 
 const RANGE = 1;
@@ -33,7 +34,16 @@ export class Tower extends EventEmitter implements VisualElement {
     this.initSprite();
   }
 
-  initSprite() {
+  private initSprite() {
+    const _initSprite = autometrics({
+      moduleName: "Tower.ts",
+      functionName: "initSprite",
+    }, this._initSprite.bind(this));
+
+    _initSprite();
+  }
+
+  private _initSprite() {
     const { textures } = PIXI.Assets.cache.get("/assets/assets.json");
     const image = PIXI.Sprite.from(textures["towerRound_sampleF_N.png"]);
     const MAX_WIDTH = TILE_SIZE * 0.75;
@@ -43,10 +53,20 @@ export class Tower extends EventEmitter implements VisualElement {
     // this.text.zIndex = -this.coordinates.y + 1;
     this.sprite.addChild(image);
     this.sprite.x = this.coordinates.x * TILE_SIZE;
-    this.sprite.y = this.coordinates.y * TILE_SIZE - 8;
+    this.sprite.y = this.coordinates.y * TILE_SIZE - 16;
     this.sprite.zIndex = this.coordinates.y;
   }
+
   tick(elapsed: number, enemies: Enemy[]) {
+    const _tick = autometrics(
+      { moduleName: "Tower.ts", functionName: "tick" },
+      this._tick.bind(this),
+    );
+
+    _tick(elapsed, enemies);
+  }
+
+  _tick(elapsed: number, enemies: Enemy[]) {
     const target = this.findNearestTargetInRange(enemies);
     this.text.text = `Target: ${
       target?.id ?? "No Target"
@@ -59,6 +79,15 @@ export class Tower extends EventEmitter implements VisualElement {
   }
 
   private findNearestTargetInRange(enemies: Enemy[]): Enemy | undefined {
+    const _findNearestTargetInRange = autometrics({
+      moduleName: "Tower.ts",
+      functionName: "findNearestTargetInRange",
+    }, this._findNearestTargetInRange.bind(this));
+
+    return _findNearestTargetInRange(enemies);
+  }
+
+  private _findNearestTargetInRange(enemies: Enemy[]): Enemy | undefined {
     const enemiesInRange = enemies.filter((enemy) => {
       if (enemy.state === "dead" || enemy.state === "finished") {
         return false;
@@ -80,6 +109,15 @@ export class Tower extends EventEmitter implements VisualElement {
   }
 
   private fire(target: Enemy, currentTime: number) {
+    const _fire = autometrics(
+      { moduleName: "Tower.ts", functionName: "fire" },
+      this._fire.bind(this),
+    );
+
+    _fire(target, currentTime);
+  }
+
+  private _fire(target: Enemy, currentTime: number) {
     sound.play(this.getRandomSample(), {});
     target.damage();
     this.lastFired = currentTime;

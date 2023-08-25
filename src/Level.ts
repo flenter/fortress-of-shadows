@@ -1,3 +1,4 @@
+import { autometrics } from "autometrics";
 import {
   Application,
   Container,
@@ -55,7 +56,11 @@ export class Level implements VisualElement {
     this.towers = [];
     this.sprite = new Container();
     this.objectsContainer = new Container();
-    this._tick = this.tick.bind(this);
+    this._tick = autometrics(
+      { moduleName: "Level.ts", functionName: "tick" },
+      this.tick.bind(this),
+    ),
+
     this.initSprite();
 
     this.text = new Text();
@@ -134,8 +139,8 @@ export class Level implements VisualElement {
   }
 
   start() {
-    this.state = "start";
     this.app.ticker.add(this._tick);
+    this.state = "start";
   }
 
   stop() {
@@ -309,18 +314,17 @@ function createMapFromTiles(tiles: Array<Array<TileType>>) {
     for (const x of tiles[y].keys()) {
       const tile = tiles[y][x];
       const hasLeftNeighbor = x > 0 && tiles[y][x - 1] === TileType.Path;
-      const hasRightNeighbor =
-        x < tiles[y].length - 1 && tiles[y][x + 1] === TileType.Path;
+      const hasRightNeighbor = x < tiles[y].length - 1 &&
+        tiles[y][x + 1] === TileType.Path;
       const hasTopNeighbor = y > 0 && tiles[y - 1][x] === TileType.Path;
-      const hasBottomNeighbor =
-        y < tiles.length - 1 && tiles[y + 1][x] === TileType.Path;
-      const isStartFinish =
-        [
-          hasLeftNeighbor,
-          hasRightNeighbor,
-          hasTopNeighbor,
-          hasBottomNeighbor,
-        ].filter(Boolean).length === 1;
+      const hasBottomNeighbor = y < tiles.length - 1 &&
+        tiles[y + 1][x] === TileType.Path;
+      const isStartFinish = [
+        hasLeftNeighbor,
+        hasRightNeighbor,
+        hasTopNeighbor,
+        hasBottomNeighbor,
+      ].filter(Boolean).length === 1;
 
       const tileX = x * TILE_SIZE;
       const tileY = y * TILE_SIZE;
@@ -347,7 +351,6 @@ function createMapFromTiles(tiles: Array<Array<TileType>>) {
       map.tile(image, tileX + 16, tileY);
       map.tile(image, tileX + 32, tileY);
       map.tile(image, tileX + 48, tileY);
-      // map.tile(image, tileX + 48, tileY);
 
       image = tile === TileType.None ? "grass.png" : "ground.png";
       if (tile !== TileType.None) {
