@@ -13,40 +13,6 @@ export const tiles = [
     TileType.None,
     TileType.None,
     TileType.None,
-  ],
-  [
-    TileType.None,
-    TileType.Path,
-    TileType.Path,
-    TileType.None,
-    TileType.None,
-    TileType.Path,
-    TileType.Path,
-  ],
-  [
-    TileType.None,
-    TileType.None,
-    TileType.Path,
-    TileType.None,
-    TileType.Path,
-    TileType.Path,
-    TileType.None,
-  ],
-  [
-    TileType.None,
-    TileType.Path,
-    TileType.Path,
-    TileType.None,
-    TileType.Path,
-    TileType.None,
-    TileType.None,
-  ],
-  [
-    TileType.None,
-    TileType.Path,
-    TileType.None,
-    TileType.None,
-    TileType.Path,
     TileType.None,
     TileType.None,
   ],
@@ -54,16 +20,73 @@ export const tiles = [
     TileType.None,
     TileType.Path,
     TileType.Path,
+    TileType.None,
+    TileType.None,
     TileType.Path,
     TileType.Path,
+    TileType.Path,
+    TileType.None,
+  ],
+  [
+    TileType.None,
+    TileType.None,
+    TileType.Path,
+    TileType.None,
+    TileType.Path,
+    TileType.Path,
+    TileType.None,
+    TileType.Path,
+    TileType.None,
+  ],
+  [
+    TileType.None,
+    TileType.Path,
+    TileType.Path,
+    TileType.None,
+    TileType.Path,
+    TileType.None,
+    TileType.None,
+    TileType.Path,
+    TileType.None,
+  ],
+  [
+    TileType.None,
+    TileType.Path,
+    TileType.None,
+    TileType.None,
+    TileType.Path,
+    TileType.None,
+    TileType.None,
+    TileType.Path,
+    TileType.Path,
+  ],
+  [
+    TileType.None,
+    TileType.Path,
+    TileType.Path,
+    TileType.Path,
+    TileType.Path,
+    TileType.None,
+    TileType.None,
+    TileType.None,
+    TileType.None,
+  ],
+  [
+    TileType.None,
+    TileType.None,
+    TileType.None,
+    TileType.None,
+    TileType.None,
+    TileType.None,
+    TileType.None,
     TileType.None,
     TileType.None,
   ],
 ];
 
 let app = new PIXI.Application({
-  width: tiles[0].length * TILE_SIZE,
-  height: tiles.length * TILE_SIZE,
+  width: 2 * tiles[0].length * TILE_SIZE,
+  height: 2 * tiles.length * TILE_SIZE,
 });
 
 const container = document.getElementById("app");
@@ -74,28 +97,3 @@ function setup() {
 }
 
 setup();
-
-// import "./style.css";
-// import typescriptLogo from "./typescript.svg";
-// import viteLogo from "/vite.svg";
-// import { setupCounter } from "./counter.ts";
-//
-// document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-//   <div>
-//     <a href="https://vitejs.dev" target="_blank">
-//       <img src="${viteLogo}" class="logo" alt="Vite logo" />
-//     </a>
-//     <a href="https://www.typescriptlang.org/" target="_blank">
-//       <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-//     </a>
-//     <h1>Vite + TypeScript</h1>
-//     <div class="card">
-//       <button id="counter" type="button"></button>
-//     </div>
-//     <p class="read-the-docs">
-//       Click on the Vite and TypeScript logos to learn more
-//     </p>
-//   </div>
-// `;
-//
-// setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);

@@ -2,6 +2,7 @@ import { Coordinates, Direction } from "./types";
 import * as PIXI from "pixi.js";
 import { TILE_SIZE } from "./constants";
 import { VisualElement } from "./VisualElement";
+import { EventEmitter } from "@pixi/utils";
 
 let id = 0;
 
@@ -64,7 +65,7 @@ function getEnemy() {
 
 type EnemyState = "walking" | "dead" | "finished";
 
-export class Enemy implements VisualElement {
+export class Enemy extends EventEmitter implements VisualElement {
   id: number;
   previousCoordinates: Coordinates | undefined;
   coordinates: Coordinates;
@@ -78,6 +79,7 @@ export class Enemy implements VisualElement {
   state: EnemyState;
 
   constructor(coordinates: Coordinates, direction: Direction) {
+    super();
     this.state = "walking";
 
     this.sprite = new PIXI.Container();
@@ -107,6 +109,8 @@ export class Enemy implements VisualElement {
     );
     this.sprite.x = x;
     this.sprite.y = y;
+    this.sprite.width *= 2;
+    this.sprite.height *= 2;
     this.sprite.zIndex = this.coordinates.y;
   }
 
@@ -119,6 +123,7 @@ export class Enemy implements VisualElement {
 
   tick(delta: number) {
     if (this.targetCoordinates && this.state === "walking") {
+      // this.sprite.zIndex = this.targetCoordinates.y;
       const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
         this.targetCoordinates,
       );
@@ -143,6 +148,7 @@ export class Enemy implements VisualElement {
           this.sprite.y = targetY;
         }
       }
+      this.sprite.zIndex = this.sprite.y + this.sprite.height;
 
       if (
         Math.round(this.sprite.x) === targetX &&
@@ -151,6 +157,12 @@ export class Enemy implements VisualElement {
         this.previousCoordinates = this.coordinates;
         this.coordinates = this.targetCoordinates;
         this.targetCoordinates = undefined;
+      }
+    }
+    if (this.state === "dead") {
+      this.sprite.alpha -= 0.02 * delta;
+      if (this.sprite.alpha < 0) {
+        this.sprite.alpha = 0;
       }
     }
   }
@@ -168,7 +180,7 @@ export class Enemy implements VisualElement {
 
   damage() {
     this.state = "dead";
-    this.character.alpha = 0.25;
+    this.character.alpha = 0.5;
     this.character.animationSpeed = 0;
   }
 }
