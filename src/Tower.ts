@@ -1,19 +1,22 @@
 import { Enemy } from "./Enemy";
+import { VisualElement } from "./VisualElement";
 import { TILE_SIZE } from "./constants";
 import { Coordinates } from "./types";
 import * as PIXI from "pixi.js";
 import { sound } from "@pixi/sound";
 
 const RANGE = 1;
-const FIRING_RATE = 250;
+const FIRING_RATE = 200;
 
 sound.add("fire", "/sounds/piew.wav");
 
-export class Tower {
+export class Tower implements VisualElement {
   coordinates: Coordinates;
+  sprite: PIXI.Sprite | PIXI.Container;
   text: PIXI.Text;
   kills: number;
-  lastFired: number;
+  // elapsed: number = 0;
+  lastFired: number = 0;
 
   constructor(coordinates: Coordinates) {
     this.coordinates = coordinates;
@@ -21,14 +24,30 @@ export class Tower {
     this.text.x = coordinates.x * TILE_SIZE;
     this.text.y = coordinates.y * TILE_SIZE;
     this.kills = 0;
-    this.lastFired = 0.0;
+    this.sprite = new PIXI.Container();
+    this.text = new PIXI.Text();
+    this.initSprite();
   }
 
+  initSprite() {
+    const { textures } = PIXI.Assets.cache.get("/assets/assets.json");
+    const image = PIXI.Sprite.from(textures["towerRound_sampleF_N.png"]);
+    const MAX_WIDTH = TILE_SIZE * 0.75;
+    image.height = image.height * (MAX_WIDTH / image.width);
+    image.width = MAX_WIDTH;
+    image.x = 0.5 * (TILE_SIZE - MAX_WIDTH);
+    image.zIndex = this.coordinates.y;
+    this.text.zIndex = this.coordinates.y + 1;
+    this.sprite.addChild(image);
+    this.sprite.addChild(this.text);
+    this.sprite.x = this.coordinates.x * TILE_SIZE;
+    this.sprite.y = this.coordinates.y * TILE_SIZE;
+  }
   tick(elapsed: number, enemies: Enemy[]) {
     const target = this.findNearestTargetInRange(enemies);
-    this.text.text = `Target: ${
-      target?.id ?? "No Target"
-    } \n Kills: ${this.kills}`;
+    this.text.text = `Target: ${target?.id ?? "No Target"} \n Kills: ${
+      this.kills
+    }`;
 
     const canFire = target && elapsed - this.lastFired > FIRING_RATE;
     if (canFire) {
@@ -49,14 +68,13 @@ export class Tower {
     });
 
     const [target] = enemiesInRange;
-
     return target;
   }
 
-  private fire(target: Enemy, elapsed: number) {
+  private fire(target: Enemy, currentTime: number) {
     sound.play("fire");
     target.damage();
-    this.lastFired = elapsed;
+    this.lastFired = currentTime;
     this.kills++;
   }
 }
