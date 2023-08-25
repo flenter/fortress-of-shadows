@@ -8,14 +8,15 @@ import { sound } from "@pixi/sound";
 const RANGE = 1;
 const FIRING_RATE = 200;
 
-
 sound.add("fire", "/sounds/piew.wav");
+
 export class Tower implements VisualElement {
   coordinates: Coordinates;
   sprite: PIXI.Sprite | PIXI.Container;
   text: PIXI.Text;
   kills: number;
-  elapsed = 0;
+  // elapsed: number = 0;
+  lastFired: number = 0;
 
   constructor(coordinates: Coordinates) {
     this.coordinates = coordinates;
@@ -42,18 +43,15 @@ export class Tower implements VisualElement {
     this.sprite.x = this.coordinates.x * TILE_SIZE;
     this.sprite.y = this.coordinates.y * TILE_SIZE;
   }
-
-  tick(delta: number, enemies: Enemy[]) {
-    this.elapsed += delta;
-
+  tick(elapsed: number, enemies: Enemy[]) {
     const target = this.findNearestTargetInRange(enemies);
     this.text.text = `Target: ${target?.id ?? "No Target"} \n Kills: ${
       this.kills
     }`;
 
-    const canFire = target && this.elapsed > FIRING_RATE;
+    const canFire = target && elapsed - this.lastFired > FIRING_RATE;
     if (canFire) {
-      this.fire(target);
+      this.fire(target, elapsed);
     }
   }
 
@@ -70,14 +68,13 @@ export class Tower implements VisualElement {
     });
 
     const [target] = enemiesInRange;
-
     return target;
   }
 
-  private fire(target: Enemy) {
-    this.elapsed = 0;
+  private fire(target: Enemy, currentTime: number) {
     sound.play("fire");
     target.damage();
+    this.lastFired = currentTime;
     this.kills++;
   }
 }

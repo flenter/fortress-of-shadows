@@ -112,9 +112,8 @@ export class Enemy implements VisualElement {
 
   private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
-      x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.sprite.width) ,
-      y:
-        coordinates.y * TILE_SIZE
+      x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.sprite.width),
+      y: coordinates.y * TILE_SIZE,
     };
   }
 

@@ -63,7 +63,7 @@ export class Level implements VisualElement {
   tick(delta: number) {
     this.elapsed += delta;
     for (const tower of this.towers) {
-      tower.tick(delta, this.enemies);
+      tower.tick(this.elapsed, this.enemies);
     }
 
     if (Math.round(this.elapsed % 100) === 0) {
@@ -86,7 +86,7 @@ export class Level implements VisualElement {
           enemy.previousCoordinates,
         );
 
-        if (next) { 
+        if (next) {
           const { coordinates: nextCoordinates, direction: nextDirection } =
             next;
 
