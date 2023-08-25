@@ -1,29 +1,46 @@
-import { Application, Container, ICanvas, Texture } from "pixi.js";
+import {
+  Application,
+  Container,
+  FederatedPointerEvent,
+  Filter,
+  ICanvas,
+  Rectangle,
+  Text,
+  TextStyle,
+  Texture,
+} from "pixi.js";
 import { Coordinates, Direction } from "./types";
 import { compareCoordinates } from "./utils";
 import { VisualElement } from "./VisualElement";
 import { TILE_SIZE } from "./constants";
 import { Tilemap } from "@pixi/tilemap";
+import { ShockwaveFilter } from "@pixi/filter-shockwave";
 import { Tower } from "./Tower";
 import { Enemy } from "./Enemy";
 
 export enum TileType {
-  None,
-  Path,
+  None = "none",
+  Path = "path",
 }
 
 export type TileMap = Array<TileType[]>;
 
+type State = "start" | "end" | "initial";
+
 export class Level implements VisualElement {
-  startCoordinates: Coordinates;
-  endCoordinates: Coordinates;
+  private startCoordinates: Coordinates;
+  private endCoordinates: Coordinates;
   sprite: VisualElement["sprite"];
-  objectsContainer: VisualElement["sprite"];
-  towers: Array<Tower> = [];
-  enemies: Array<Enemy> = [];
+  private objectsContainer: VisualElement["sprite"];
+  private towers: Array<Tower> = [];
+  private enemies: Array<Enemy> = [];
   private tileMap: TileMap;
-  elapsed: number = 0.0;
-  app: Application<ICanvas>;
+  private elapsed: number = 0.0;
+  private enemyAdded: number = 0.0;
+  private app: Application<ICanvas>;
+  private state: State = "initial";
+  private _tick: Level["tick"];
+  private text: Text;
 
   constructor(
     map: TileMap,
@@ -35,10 +52,70 @@ export class Level implements VisualElement {
     this.tileMap = map;
     this.startCoordinates = startCoordinates;
     this.endCoordinates = endCoordinates;
-    this.towers = [new Tower({ x: 3, y: 2 }), new Tower({ x: 2, y: 4 })];
+    this.towers = [];
     this.sprite = new Container();
     this.objectsContainer = new Container();
+    this._tick = this.tick.bind(this);
     this.initSprite();
+
+    this.text = new Text();
+    this.text.text = "GAME OVER";
+    const style = new TextStyle({
+      fontFamily: "Helvetica",
+      dropShadow: true,
+      fill: "#FFFFFF",
+    });
+    this.text.style = style;
+    this.text.x = this.sprite.width / 2 - this.text.width / 2;
+    this.text.y = this.sprite.height / 2 - this.text.height / 2;
+
+    this.sprite.eventMode = "static";
+    this.sprite.cursor = "pointer";
+    this.sprite.hitArea = new Rectangle(
+      0,
+      0,
+      this.sprite.width,
+      this.sprite.height,
+    );
+    this.sprite.on("pointerdown", (event: FederatedPointerEvent) => {
+      if (this.state !== "start") {
+        return;
+      }
+      const tileX = Math.floor(event.global.x / TILE_SIZE);
+      const tileY = Math.floor(event.global.y / TILE_SIZE);
+
+      const tile = this.getTile({ x: tileX, y: tileY });
+      if (tile === TileType.None) {
+        this.addTower(tileX, tileY);
+      }
+    });
+  }
+
+  addTower(x: number, y: number) {
+    const tower = new Tower({ x, y });
+    this.objectsContainer.addChild(tower.sprite);
+    this.towers.push(tower);
+
+    tower.addListener("fire", (event) => {
+      const { tower: target } = event;
+      const filter = new ShockwaveFilter(
+        [
+          target.sprite.x + 0.5 * target.sprite.width,
+          target.sprite.y + target.sprite.height - 8,
+        ],
+        {
+          amplitude: 10,
+          wavelength: 200,
+          brightness: 1,
+          radius: 500,
+          speed: 20,
+        },
+      );
+
+      const filters: Array<Filter> = this.sprite.filters || [];
+      filters.push(filter);
+      this.sprite.filters = filters;
+    });
   }
 
   initSprite() {
@@ -57,7 +134,14 @@ export class Level implements VisualElement {
   }
 
   start() {
-    this.app.ticker.add(this.tick.bind(this));
+    this.state = "start";
+    this.app.ticker.add(this._tick);
+  }
+
+  stop() {
+    this.state = "end";
+    this.app.ticker.remove(this._tick);
+    this.sprite.addChild(this.text);
   }
 
   tick(delta: number) {
@@ -66,7 +150,16 @@ export class Level implements VisualElement {
       tower.tick(this.elapsed, this.enemies);
     }
 
-    if (Math.round(this.elapsed % 100) === 0) {
+    if (this.sprite.filters) {
+      for (const filter of this.sprite.filters) {
+        if (filter.time !== undefined) {
+          filter.time += delta;
+        }
+      }
+    }
+
+    if (this.elapsed > this.enemyAdded + 100) {
+      this.enemyAdded = this.elapsed;
       const newEnemy = new Enemy(this.startCoordinates, Direction.Down);
       this.enemies.push(newEnemy);
       this.objectsContainer.addChild(newEnemy.sprite);
@@ -77,6 +170,7 @@ export class Level implements VisualElement {
 
       if (compareCoordinates(enemy.coordinates, this.endCoordinates)) {
         enemy.finished();
+        this.stop();
         this.enemies = this.enemies.filter(({ id }) => id !== enemy.id);
       }
 
@@ -251,6 +345,9 @@ function createMapFromTiles(tiles: Array<Array<TileType>>) {
         }
       }
       map.tile(image, tileX + 16, tileY);
+      map.tile(image, tileX + 32, tileY);
+      map.tile(image, tileX + 48, tileY);
+      // map.tile(image, tileX + 48, tileY);
 
       image = tile === TileType.None ? "grass.png" : "ground.png";
       if (tile !== TileType.None) {
@@ -264,24 +361,36 @@ function createMapFromTiles(tiles: Array<Array<TileType>>) {
           image = "edge-right.png";
         }
       }
-      map.tile(image, tileX + 32, tileY);
+      map.tile(image, tileX + 64, tileY);
+
       image = tile === TileType.None ? "grass.png" : "ground.png";
       if (!isStartFinish && tile !== TileType.None) {
         if (!hasLeftNeighbor) {
           image = "edge-left.png";
         }
       }
-
       map.tile(image, tileX, tileY + 16);
+      map.tile(image, tileX, tileY + 32);
+      map.tile(image, tileX, tileY + 48);
       image = tile === TileType.None ? "grass.png" : "ground.png";
       map.tile(image, tileX + 16, tileY + 16);
+      map.tile(image, tileX + 16, tileY + 32);
+      map.tile(image, tileX + 16, tileY + 48);
+      map.tile(image, tileX + 32, tileY + 16);
+      map.tile(image, tileX + 32, tileY + 32);
+      map.tile(image, tileX + 32, tileY + 48);
+      map.tile(image, tileX + 48, tileY + 16);
+      map.tile(image, tileX + 48, tileY + 32);
+      map.tile(image, tileX + 48, tileY + 48);
       image = tile === TileType.None ? "grass.png" : "ground.png";
       if (!isStartFinish && tile !== TileType.None) {
         if (!hasRightNeighbor) {
           image = "edge-right.png";
         }
       }
-      map.tile(image, tileX + 32, tileY + 16);
+      map.tile(image, tileX + 64, tileY + 16);
+      map.tile(image, tileX + 64, tileY + 32);
+      map.tile(image, tileX + 64, tileY + 48);
       image = tile === TileType.None ? "grass.png" : "ground.png";
       if (tile !== TileType.None) {
         if (!hasLeftNeighbor && !hasBottomNeighbor) {
@@ -294,14 +403,16 @@ function createMapFromTiles(tiles: Array<Array<TileType>>) {
           image = "edge-left.png";
         }
       }
-      map.tile(image, tileX, tileY + 32);
+      map.tile(image, tileX, tileY + 64);
       image = tile === TileType.None ? "grass.png" : "ground.png";
       if (tile !== TileType.None) {
         if (!hasBottomNeighbor) {
           image = "edge-bottom.png";
         }
       }
-      map.tile(image, tileX + 16, tileY + 32);
+      map.tile(image, tileX + 16, tileY + 64);
+      map.tile(image, tileX + 32, tileY + 64);
+      map.tile(image, tileX + 48, tileY + 64);
       image = tile === TileType.None ? "grass.png" : "ground.png";
       if (tile !== TileType.None) {
         if (!hasBottomNeighbor) {
@@ -314,7 +425,7 @@ function createMapFromTiles(tiles: Array<Array<TileType>>) {
           image = "edge-right.png";
         }
       }
-      map.tile(image, tileX + 32, tileY + 32);
+      map.tile(image, tileX + 64, tileY + 64);
     }
   }
   return map;

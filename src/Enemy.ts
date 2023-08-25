@@ -2,6 +2,7 @@ import { Coordinates, Direction } from "./types";
 import * as PIXI from "pixi.js";
 import { TILE_SIZE } from "./constants";
 import { VisualElement } from "./VisualElement";
+import { EventEmitter } from "@pixi/utils";
 
 let id = 0;
 
@@ -19,7 +20,6 @@ function getEnemy() {
       name: "big_zombie_run_anim_f",
       speed: 0.25,
     },
-    // "dwarf_f_run_anim_f",
     {
       name: "elf_m_run_anim_f",
       speed: 1.1,
@@ -40,23 +40,14 @@ function getEnemy() {
       name: "lizard_f_run_anim_f",
       speed: 1.2,
     },
-    // "masked_orc_run_anim_f",
     {
       name: "ogre_run_anim_f",
       speed: 1,
     },
-    // "orc_shaman_run_anim_f",
-    // "orc_warrior_run_anim_f",
-    // "pumpkin_dude_run_anim_f",
-    // "skelet_run_anim_f",
-    // "tiny_zombie_run_anim_f",
     {
       name: "wizzard_f_run_anim_f",
       speed: 1.05,
     },
-    // "wogol_run_anim_f",
-    // "chort_run_anim_f",
-    // "doc_run_anim_f",
   ];
   const index = Math.floor(Math.random() * stats.length);
   return stats[index];
@@ -64,7 +55,7 @@ function getEnemy() {
 
 type EnemyState = "walking" | "dead" | "finished";
 
-export class Enemy implements VisualElement {
+export class Enemy extends EventEmitter implements VisualElement {
   id: number;
   previousCoordinates: Coordinates | undefined;
   coordinates: Coordinates;
@@ -74,19 +65,17 @@ export class Enemy implements VisualElement {
   speed = 1;
   type: string;
   private character: PIXI.AnimatedSprite;
-  private text: PIXI.Text;
   state: EnemyState;
 
   constructor(coordinates: Coordinates, direction: Direction) {
+    super();
     this.state = "walking";
 
     this.sprite = new PIXI.Container();
 
     this.id = id++;
     this.coordinates = coordinates;
-    // this.targetCoordinates = coordinates;
     this.direction = direction;
-    this.text = new PIXI.Text(String(this.id));
     this.sprite = new PIXI.Container();
     const stats = getEnemy();
     this.type = stats.name;
@@ -101,7 +90,9 @@ export class Enemy implements VisualElement {
   initSprite() {
     this.sprite.addChild(this.character);
     this.character.play();
-    this.character.animationSpeed = 0.15;
+    this.character.animationSpeed = 0.2;
+    this.sprite.width *= 2;
+    this.sprite.height *= 2;
     const { x, y } = this.translateToScreenCoordinates(
       this.targetCoordinates || this.coordinates,
     );
@@ -113,7 +104,7 @@ export class Enemy implements VisualElement {
   private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
       x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.sprite.width),
-      y: coordinates.y * TILE_SIZE,
+      y: coordinates.y * TILE_SIZE - 8, // + 0.5 * (this.sprite.height - TILE_SIZE),
     };
   }
 
@@ -143,6 +134,7 @@ export class Enemy implements VisualElement {
           this.sprite.y = targetY;
         }
       }
+      this.sprite.zIndex = this.sprite.y + this.sprite.height;
 
       if (
         Math.round(this.sprite.x) === targetX &&
@@ -151,6 +143,12 @@ export class Enemy implements VisualElement {
         this.previousCoordinates = this.coordinates;
         this.coordinates = this.targetCoordinates;
         this.targetCoordinates = undefined;
+      }
+    }
+    if (this.state === "dead") {
+      this.sprite.alpha -= 0.02 * delta;
+      if (this.sprite.alpha < 0) {
+        this.sprite.alpha = 0;
       }
     }
   }
@@ -168,7 +166,7 @@ export class Enemy implements VisualElement {
 
   damage() {
     this.state = "dead";
-    this.character.alpha = 0.25;
+    this.character.alpha = 0.5;
     this.character.animationSpeed = 0;
   }
 }
