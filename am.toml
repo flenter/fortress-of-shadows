@@ -1,0 +1,11 @@
+pushgateway-enabled = true
+prometheus-scrape-interval = "1m"
+ 
+[[endpoint]]
+job-name = "main_app"
+url = "http://localhost:5173"
+prometheus-scrape-interval = "5s"
+ 
+# [[endpoint]]
+# job-name = "another_app"
+# url = "http://localhost:9090"

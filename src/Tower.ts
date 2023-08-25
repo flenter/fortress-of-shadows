@@ -4,6 +4,7 @@ import { TILE_SIZE } from "./constants";
 import { Coordinates } from "./types";
 import * as PIXI from "pixi.js";
 import { sound } from "@pixi/sound";
+import { Autometrics } from "autometrics";
 
 const RANGE = 1;
 const FIRING_RATE = 200;
@@ -43,11 +44,12 @@ export class Tower implements VisualElement {
     this.sprite.x = this.coordinates.x * TILE_SIZE;
     this.sprite.y = this.coordinates.y * TILE_SIZE;
   }
+
   tick(elapsed: number, enemies: Enemy[]) {
     const target = this.findNearestTargetInRange(enemies);
-    this.text.text = `Target: ${target?.id ?? "No Target"} \n Kills: ${
-      this.kills
-    }`;
+    this.text.text = `Target: ${
+      target?.id ?? "No Target"
+    } \n Kills: ${this.kills}`;
 
     const canFire = target && elapsed - this.lastFired > FIRING_RATE;
     if (canFire) {

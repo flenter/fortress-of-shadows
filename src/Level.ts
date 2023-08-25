@@ -1,3 +1,4 @@
+import { autometrics } from "autometrics";
 import { Application, Container, ICanvas, Texture } from "pixi.js";
 import { Coordinates, Direction } from "./types";
 import { compareCoordinates } from "./utils";
@@ -57,7 +58,12 @@ export class Level implements VisualElement {
   }
 
   start() {
-    this.app.ticker.add(this.tick.bind(this));
+    this.app.ticker.add(
+      autometrics(
+        { moduleName: "Level.ts", functionName: "tick" },
+        this.tick.bind(this),
+      ),
+    );
   }
 
   tick(delta: number) {
@@ -215,18 +221,17 @@ function createMapFromTiles(tiles: Array<Array<TileType>>) {
     for (const x of tiles[y].keys()) {
       const tile = tiles[y][x];
       const hasLeftNeighbor = x > 0 && tiles[y][x - 1] === TileType.Path;
-      const hasRightNeighbor =
-        x < tiles[y].length - 1 && tiles[y][x + 1] === TileType.Path;
+      const hasRightNeighbor = x < tiles[y].length - 1 &&
+        tiles[y][x + 1] === TileType.Path;
       const hasTopNeighbor = y > 0 && tiles[y - 1][x] === TileType.Path;
-      const hasBottomNeighbor =
-        y < tiles.length - 1 && tiles[y + 1][x] === TileType.Path;
-      const isStartFinish =
-        [
-          hasLeftNeighbor,
-          hasRightNeighbor,
-          hasTopNeighbor,
-          hasBottomNeighbor,
-        ].filter(Boolean).length === 1;
+      const hasBottomNeighbor = y < tiles.length - 1 &&
+        tiles[y + 1][x] === TileType.Path;
+      const isStartFinish = [
+        hasLeftNeighbor,
+        hasRightNeighbor,
+        hasTopNeighbor,
+        hasBottomNeighbor,
+      ].filter(Boolean).length === 1;
 
       const tileX = x * TILE_SIZE;
       const tileY = y * TILE_SIZE;
