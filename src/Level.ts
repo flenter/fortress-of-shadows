@@ -1,16 +1,26 @@
-import { Application, Container, Filter, ICanvas, Text, TextStyle, Texture } from "pixi.js";
+import {
+  Application,
+  Container,
+  FederatedPointerEvent,
+  Filter,
+  ICanvas,
+  Rectangle,
+  Text,
+  TextStyle,
+  Texture,
+} from "pixi.js";
 import { Coordinates, Direction } from "./types";
 import { compareCoordinates } from "./utils";
 import { VisualElement } from "./VisualElement";
 import { TILE_SIZE } from "./constants";
 import { Tilemap } from "@pixi/tilemap";
-import { ShockwaveFilter} from "@pixi/filter-shockwave";
+import { ShockwaveFilter } from "@pixi/filter-shockwave";
 import { Tower } from "./Tower";
 import { Enemy } from "./Enemy";
 
 export enum TileType {
-  None,
-  Path,
+  None = "none",
+  Path = "path",
 }
 
 export type TileMap = Array<TileType[]>;
@@ -54,11 +64,36 @@ export class Level implements VisualElement {
       fontFamily: "Helvetica",
       dropShadow: true,
       fill: "#FFFFFF",
-  });
+    });
     this.text.style = style;
     this.text.x = this.sprite.width / 2 - this.text.width / 2;
     this.text.y = this.sprite.height / 2 - this.text.height / 2;
-    // ("GAME OVER");
+
+    this.sprite.eventMode = "static";
+    this.sprite.cursor = "pointer";
+    this.sprite.hitArea = new Rectangle(
+      0,
+      0,
+      this.sprite.width,
+      this.sprite.height,
+    );
+    this.sprite.on("pointerdown", (event: FederatedPointerEvent) => {
+      // if (this.state !== "start") {
+      //   return;
+      // }
+      console.log(event);
+      console.log("event", event.global);
+      const tileX = Math.floor(event.global.x / TILE_SIZE);
+      const tileY = Math.floor(event.global.y / TILE_SIZE);
+
+      const tile = this.getTile({ x: tileX, y: tileY });
+      if (tile === TileType.None) {
+        this.addTower(tileX, tileY);
+      }
+      // console.log(tileX, tileY, 'tile', tile);
+      // console.log(event.);
+      // this.coor
+    });
   }
 
   addTower(x: number, y: number) {
@@ -67,9 +102,12 @@ export class Level implements VisualElement {
     this.towers.push(tower);
 
     tower.addListener("fire", (event) => {
-      const {tower: target} = event;
+      const { tower: target } = event;
       const filter = new ShockwaveFilter(
-        [target.sprite.x + 0.5 * target.sprite.width, target.sprite.y + target.sprite.height - 8],
+        [
+          target.sprite.x + 0.5 * target.sprite.width,
+          target.sprite.y + target.sprite.height - 8,
+        ],
         {
           amplitude: 10,
           wavelength: 200,
@@ -78,7 +116,7 @@ export class Level implements VisualElement {
           speed: 20,
         },
       );
-  
+
       const filters: Array<Filter> = this.sprite.filters || [];
       filters.push(filter);
       this.sprite.filters = filters;
@@ -269,7 +307,6 @@ export class Level implements VisualElement {
     }
   }
 }
-
 
 function createMapFromTiles(tiles: Array<Array<TileType>>) {
   const map = new Tilemap([Texture.from("grass.png")]);

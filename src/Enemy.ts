@@ -104,7 +104,7 @@ export class Enemy extends EventEmitter implements VisualElement {
   private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
       x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.sprite.width),
-      y: coordinates.y * TILE_SIZE - 8,// + 0.5 * (this.sprite.height - TILE_SIZE),
+      y: coordinates.y * TILE_SIZE - 8, // + 0.5 * (this.sprite.height - TILE_SIZE),
     };
   }
 
