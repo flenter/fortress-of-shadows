@@ -9,7 +9,10 @@ import { EventEmitter } from "@pixi/utils";
 const RANGE = 1;
 const FIRING_RATE = 200;
 
-sound.add("fire", "/sounds/piew.wav");
+sound.add("fire1", "/sounds/piew1.wav");
+sound.add("fire2", "/sounds/piew2.wav");
+sound.add("fire3", "/sounds/piew3.wav");
+sound.add("fire4", "/sounds/piew4.wav");
 
 export class Tower extends EventEmitter implements VisualElement {
   coordinates: Coordinates;
@@ -45,9 +48,9 @@ export class Tower extends EventEmitter implements VisualElement {
   }
   tick(elapsed: number, enemies: Enemy[]) {
     const target = this.findNearestTargetInRange(enemies);
-    this.text.text = `Target: ${target?.id ?? "No Target"} \n Kills: ${
-      this.kills
-    }`;
+    this.text.text = `Target: ${
+      target?.id ?? "No Target"
+    } \n Kills: ${this.kills}`;
 
     const canFire = target && elapsed - this.lastFired > FIRING_RATE;
     if (canFire) {
@@ -71,8 +74,13 @@ export class Tower extends EventEmitter implements VisualElement {
     return target;
   }
 
+  private getRandomSample() {
+    const samples = ["fire1", "fire2", "fire3", "fire4"];
+    return samples[Math.floor(Math.random() * samples.length)];
+  }
+
   private fire(target: Enemy, currentTime: number) {
-    sound.play("fire", {});
+    sound.play(this.getRandomSample(), {});
     target.damage();
     this.lastFired = currentTime;
     this.kills++;
