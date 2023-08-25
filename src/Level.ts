@@ -56,7 +56,11 @@ export class Level implements VisualElement {
     this.towers = [];
     this.sprite = new Container();
     this.objectsContainer = new Container();
-    this._tick = this.tick.bind(this);
+    this._tick = autometrics(
+      { moduleName: "Level.ts", functionName: "tick" },
+      this.tick.bind(this),
+    ),
+
     this.initSprite();
 
     this.text = new Text();
@@ -135,14 +139,8 @@ export class Level implements VisualElement {
   }
 
   start() {
-    this.app.ticker.add(
-      autometrics(
-        { moduleName: "Level.ts", functionName: "tick" },
-        this.tick.bind(this),
-      ),
-    );
-    this.state = "start";
     this.app.ticker.add(this._tick);
+    this.state = "start";
   }
 
   stop() {
@@ -353,7 +351,6 @@ function createMapFromTiles(tiles: Array<Array<TileType>>) {
       map.tile(image, tileX + 16, tileY);
       map.tile(image, tileX + 32, tileY);
       map.tile(image, tileX + 48, tileY);
-      // map.tile(image, tileX + 48, tileY);
 
       image = tile === TileType.None ? "grass.png" : "ground.png";
       if (tile !== TileType.None) {
