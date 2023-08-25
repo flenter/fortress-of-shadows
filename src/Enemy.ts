@@ -2,6 +2,7 @@ import { Coordinates, Direction } from "./types";
 import * as PIXI from "pixi.js";
 import { TILE_SIZE } from "./constants";
 import { VisualElement } from "./VisualElement";
+import { autometrics } from "autometrics";
 
 let id = 0;
 
@@ -118,6 +119,15 @@ export class Enemy implements VisualElement {
   }
 
   tick(delta: number) {
+    const _tick = autometrics(
+      { moduleName: "Enemy.ts", functionName: "tick" },
+      this._tick.bind(this),
+    );
+
+    _tick(delta);
+  }
+
+  _tick(delta: number) {
     if (this.targetCoordinates && this.state === "walking") {
       const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
         this.targetCoordinates,
@@ -156,17 +166,44 @@ export class Enemy implements VisualElement {
   }
 
   setNextPosition(nextCoordinates: Coordinates, nextDirection: Direction) {
+    const _setNextPosition = autometrics({
+      moduleName: "Enemy.ts",
+      functionName: "setNextPosition",
+    }, this._setNextPosition.bind(this));
+
+    _setNextPosition(nextCoordinates, nextDirection);
+  }
+
+  _setNextPosition(nextCoordinates: Coordinates, nextDirection: Direction) {
     this.previousCoordinates = this.coordinates;
     this.targetCoordinates = nextCoordinates;
     this.direction = nextDirection;
   }
 
   finished() {
+    const _finished = autometrics({
+      moduleName: "Enemy.ts",
+      functionName: "finished",
+    }, this._finished.bind(this));
+
+    _finished();
+  }
+
+  _finished() {
     this.state = "finished";
     this.character.animationSpeed = 0;
   }
 
   damage() {
+    const _damage = autometrics({
+      moduleName: "Enemy.ts",
+      functionName: "damage",
+    }, this._damage.bind(this));
+
+    _damage();
+  }
+
+  _damage() {
     this.state = "dead";
     this.character.alpha = 0.25;
     this.character.animationSpeed = 0;
