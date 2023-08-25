@@ -4,6 +4,7 @@ import { TILE_SIZE } from "./constants";
 import { VisualElement } from "./VisualElement";
 import { autometrics } from "autometrics";
 import { EventEmitter } from "@pixi/utils";
+import { ProgressBar } from "./ProgressBar";
 
 let id = 0;
 
@@ -12,42 +13,52 @@ function getEnemy() {
     {
       name: "big_demon_run_anim_f",
       speed: 0.2,
+      health: 5,
     },
     {
       name: "angel_run_anim_f",
       speed: 1.5,
+      health: 3,
     },
     {
       name: "big_zombie_run_anim_f",
       speed: 0.25,
+      health: 1
     },
     {
       name: "elf_m_run_anim_f",
       speed: 1.1,
+      health: 1
     },
     {
       name: "slug_anim_f",
       speed: 0.1,
+      health: 4
     },
     {
       name: "goblin_run_anim_f",
       speed: 1,
+      health: 1
     },
     {
       name: "knight_m_run_anim_f",
       speed: 0.9,
+      health: 4
     },
     {
       name: "lizard_f_run_anim_f",
       speed: 1.2,
+      health: 3
     },
     {
       name: "ogre_run_anim_f",
       speed: 1,
+      health: 3
     },
     {
       name: "wizzard_f_run_anim_f",
       speed: 1.05,
+      health: 2
     },
   ];
   const index = Math.floor(Math.random() * stats.length);
@@ -67,6 +78,9 @@ export class Enemy extends EventEmitter implements VisualElement {
   type: string;
   private character: PIXI.AnimatedSprite;
   state: EnemyState;
+  health = 5;
+  maxHealth = 5;
+  bar: ProgressBar;
 
   constructor(coordinates: Coordinates, direction: Direction) {
     super();
@@ -81,10 +95,16 @@ export class Enemy extends EventEmitter implements VisualElement {
     const stats = getEnemy();
     this.type = stats.name;
     this.speed = stats.speed;
+    this.maxHealth = stats.health;
+    this.health = stats.health;
     const { data } = PIXI.Assets.cache.get("/assets/assets.json");
     const { animations } = data;
     const animation = animations[this.type];
     this.character = PIXI.AnimatedSprite.fromFrames(animation);
+    this.bar = new ProgressBar({
+      width: 20,
+      progress: 100,
+    })
     this.initSprite();
   }
 
@@ -101,14 +121,15 @@ export class Enemy extends EventEmitter implements VisualElement {
     this.sprite.addChild(this.character);
     this.character.play();
     this.character.animationSpeed = 0.2;
-    this.sprite.width *= 2;
-    this.sprite.height *= 2;
+    this.character.width *= 2;
+    this.character.height *= 2;
     const { x, y } = this.translateToScreenCoordinates(
       this.targetCoordinates || this.coordinates,
     );
     this.sprite.x = x;
     this.sprite.y = y;
     this.sprite.zIndex = this.coordinates.y;
+    this.sprite.addChild(this.bar.sprite);
   }
 
   private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
@@ -122,8 +143,8 @@ export class Enemy extends EventEmitter implements VisualElement {
 
   private _translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
-      x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.sprite.width),
-      y: coordinates.y * TILE_SIZE - 8, // + 0.5 * (this.sprite.height - TILE_SIZE),
+      x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.character.width),
+      y: coordinates.y * TILE_SIZE - 8, // + 0.5 * (this.character.height - TILE_SIZE),
     };
   }
 
@@ -162,7 +183,7 @@ export class Enemy extends EventEmitter implements VisualElement {
           this.sprite.y = targetY;
         }
       }
-      this.sprite.zIndex = this.sprite.y + this.sprite.height;
+      this.sprite.zIndex = this.sprite.y + this.character.height;
 
       if (
         Math.round(this.sprite.x) === targetX &&
@@ -210,18 +231,25 @@ export class Enemy extends EventEmitter implements VisualElement {
     this.character.animationSpeed = 0;
   }
 
-  damage() {
+  damage(amount: number): boolean {
+    
     const _damage = autometrics({
       moduleName: "Enemy.ts",
       functionName: "damage",
     }, this._damage.bind(this));
 
-    _damage();
+    return _damage(amount);
   }
 
-  _damage() {
+  _damage(amount: number): boolean {
+    this.health -= amount;  
+    this.bar.progress =this.health / this.maxHealth * 100;
+    if (this.health > 0) {
+      return false;
+    }
     this.state = "dead";
     this.character.alpha = 0.5;
     this.character.animationSpeed = 0;
+    return true;
   }
 }
