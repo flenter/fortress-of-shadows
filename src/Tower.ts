@@ -6,9 +6,8 @@ import * as PIXI from "pixi.js";
 import { sound } from "@pixi/sound";
 
 const RANGE = 1;
-const FIRING_RATE = 250;
+const FIRING_RATE = 200;
 
-let elapsed = 0;
 
 sound.add("fire", "/sounds/piew.wav");
 export class Tower implements VisualElement {
@@ -16,6 +15,7 @@ export class Tower implements VisualElement {
   sprite: PIXI.Sprite | PIXI.Container;
   text: PIXI.Text;
   kills: number;
+  elapsed = 0;
 
   constructor(coordinates: Coordinates) {
     this.coordinates = coordinates;
@@ -44,14 +44,14 @@ export class Tower implements VisualElement {
   }
 
   tick(delta: number, enemies: Enemy[]) {
-    elapsed += delta;
+    this.elapsed += delta;
 
     const target = this.findNearestTargetInRange(enemies);
     this.text.text = `Target: ${target?.id ?? "No Target"} \n Kills: ${
       this.kills
     }`;
 
-    const canFire = target && Math.round(elapsed % FIRING_RATE) === 0;
+    const canFire = target && this.elapsed > FIRING_RATE;
     if (canFire) {
       this.fire(target);
     }
@@ -75,6 +75,7 @@ export class Tower implements VisualElement {
   }
 
   private fire(target: Enemy) {
+    this.elapsed = 0;
     sound.play("fire");
     target.damage();
     this.kills++;

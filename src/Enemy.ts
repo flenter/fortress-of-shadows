@@ -83,9 +83,8 @@ export class Enemy implements VisualElement {
     this.sprite = new PIXI.Container();
 
     this.id = id++;
-    console.log(coordinates, direction, Direction.Down)
     this.coordinates = coordinates;
-    this.targetCoordinates = coordinates;
+    // this.targetCoordinates = coordinates;
     this.direction = direction;
     this.text = new PIXI.Text(String(this.id));
     this.sprite = new PIXI.Container();
@@ -103,54 +102,52 @@ export class Enemy implements VisualElement {
     this.sprite.addChild(this.character);
     this.character.play();
     this.character.animationSpeed = 0.15;
-    const { x, y } = this.translateToScreenCoordinates(this.targetCoordinates||this.coordinates);
+    const { x, y } = this.translateToScreenCoordinates(
+      this.targetCoordinates || this.coordinates,
+    );
     this.sprite.x = x;
     this.sprite.y = y;
     this.sprite.zIndex = this.coordinates.y;
   }
 
   private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
-    // console.log('go to ', coordinates)
     return {
-      x: coordinates.x * TILE_SIZE+
-        0.5 * this.sprite.width,
-      y: coordinates.y * TILE_SIZE +
-        // 0.5 * TILE_SIZE -
-        0.5 * this.sprite.height -
-        8,
+      x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.sprite.width) ,
+      y:
+        coordinates.y * TILE_SIZE
     };
   }
 
   tick(delta: number) {
-    if (this.targetCoordinates) {
+    if (this.targetCoordinates && this.state === "walking") {
       const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
         this.targetCoordinates,
       );
-      if (targetX > this.character.x) {
-        this.character.x += delta * this.speed;
-        if (this.character.x > targetX) {
-          this.character.x = targetX;
+      if (targetX > this.sprite.x) {
+        this.sprite.x += delta * this.speed;
+        if (this.sprite.x > targetX) {
+          this.sprite.x = targetX;
         }
-      } else if (targetX < this.character.x) {
-        this.character.x -= delta * this.speed;
-        if (this.character.x < targetX) {
-          this.character.x = targetX;
+      } else if (targetX < this.sprite.x) {
+        this.sprite.x -= delta * this.speed;
+        if (this.sprite.x < targetX) {
+          this.sprite.x = targetX;
         }
-      } else if (targetY > this.character.y) {
-        this.character.y += delta * this.speed;
-        if (this.character.y > targetY) {
-          this.character.y = targetY;
+      } else if (targetY > this.sprite.y) {
+        this.sprite.y += delta * this.speed;
+        if (this.sprite.y > targetY) {
+          this.sprite.y = targetY;
         }
-      } else if (targetY < this.character.y) {
-        this.character.y -= delta * this.speed;
-        if (this.character.y < targetY) {
-          this.character.y = targetY;
+      } else if (targetY < this.sprite.y) {
+        this.sprite.y -= delta * this.speed;
+        if (this.sprite.y < targetY) {
+          this.sprite.y = targetY;
         }
       }
 
       if (
-        Math.round(this.character.x) === targetX &&
-        Math.round(this.character.y) === targetY
+        Math.round(this.sprite.x) === targetX &&
+        Math.round(this.sprite.y) === targetY
       ) {
         this.previousCoordinates = this.coordinates;
         this.coordinates = this.targetCoordinates;
@@ -167,9 +164,12 @@ export class Enemy implements VisualElement {
 
   finished() {
     this.state = "finished";
+    this.character.animationSpeed = 0;
   }
 
   damage() {
     this.state = "dead";
+    this.character.alpha = 0.25;
+    this.character.animationSpeed = 0;
   }
 }

@@ -35,22 +35,10 @@ export class Level implements VisualElement {
     this.tileMap = map;
     this.startCoordinates = startCoordinates;
     this.endCoordinates = endCoordinates;
-    this.towers = [
-      new Tower({ x: 3, y: 2 }),
-      new Tower({ x: 2, y: 4 }),
-    ];
+    this.towers = [new Tower({ x: 3, y: 2 }), new Tower({ x: 2, y: 4 })];
     this.sprite = new Container();
     this.objectsContainer = new Container();
     this.initSprite();
-  }
-
-  kill(enemy: Enemy) {
-    const targetIndex = this.enemies.findIndex(({ id }) => enemy.id === id);
-
-    if (targetIndex !== undefined) {
-      this.enemies[targetIndex].kill();
-      this.enemies.splice(targetIndex, 1);
-    }
   }
 
   initSprite() {
@@ -98,7 +86,7 @@ export class Level implements VisualElement {
           enemy.previousCoordinates,
         );
 
-        if (next) {
+        if (next) { 
           const { coordinates: nextCoordinates, direction: nextDirection } =
             next;
 
