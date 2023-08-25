@@ -1,4 +1,4 @@
-import { Application, Container, Filter, ICanvas, Texture } from "pixi.js";
+import { Application, Container, Filter, ICanvas, Text, TextStyle, Texture } from "pixi.js";
 import { Coordinates, Direction } from "./types";
 import { compareCoordinates } from "./utils";
 import { VisualElement } from "./VisualElement";
@@ -18,18 +18,19 @@ export type TileMap = Array<TileType[]>;
 type State = "start" | "end" | "initial";
 
 export class Level implements VisualElement {
-  startCoordinates: Coordinates;
-  endCoordinates: Coordinates;
+  private startCoordinates: Coordinates;
+  private endCoordinates: Coordinates;
   sprite: VisualElement["sprite"];
-  objectsContainer: VisualElement["sprite"];
-  towers: Array<Tower> = [];
-  enemies: Array<Enemy> = [];
+  private objectsContainer: VisualElement["sprite"];
+  private towers: Array<Tower> = [];
+  private enemies: Array<Enemy> = [];
   private tileMap: TileMap;
-  elapsed: number = 0.0;
-  enemyAdded: number = 0.0;
-  app: Application<ICanvas>;
-  state: State = "initial";
-  _tick: Level["tick"];
+  private elapsed: number = 0.0;
+  private enemyAdded: number = 0.0;
+  private app: Application<ICanvas>;
+  private state: State = "initial";
+  private _tick: Level["tick"];
+  private text: Text;
 
   constructor(
     map: TileMap,
@@ -46,6 +47,18 @@ export class Level implements VisualElement {
     this.objectsContainer = new Container();
     this._tick = this.tick.bind(this);
     this.initSprite();
+
+    this.text = new Text();
+    this.text.text = "GAME OVER";
+    const style = new TextStyle({
+      fontFamily: "Helvetica",
+      dropShadow: true,
+      fill: "#FFFFFF",
+  });
+    this.text.style = style;
+    this.text.x = this.sprite.width / 2 - this.text.width / 2;
+    this.text.y = this.sprite.height / 2 - this.text.height / 2;
+    // ("GAME OVER");
   }
 
   addTower(x: number, y: number) {
@@ -92,6 +105,12 @@ export class Level implements VisualElement {
     this.app.ticker.add(this._tick);
   }
 
+  stop() {
+    this.state = "end";
+    this.app.ticker.remove(this._tick);
+    this.sprite.addChild(this.text);
+  }
+
   tick(delta: number) {
     this.elapsed += delta;
     for (const tower of this.towers) {
@@ -118,6 +137,7 @@ export class Level implements VisualElement {
 
       if (compareCoordinates(enemy.coordinates, this.endCoordinates)) {
         enemy.finished();
+        this.stop();
         this.enemies = this.enemies.filter(({ id }) => id !== enemy.id);
       }
 

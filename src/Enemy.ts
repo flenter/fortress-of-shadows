@@ -20,7 +20,6 @@ function getEnemy() {
       name: "big_zombie_run_anim_f",
       speed: 0.25,
     },
-    // "dwarf_f_run_anim_f",
     {
       name: "elf_m_run_anim_f",
       speed: 1.1,
@@ -41,23 +40,14 @@ function getEnemy() {
       name: "lizard_f_run_anim_f",
       speed: 1.2,
     },
-    // "masked_orc_run_anim_f",
     {
       name: "ogre_run_anim_f",
       speed: 1,
     },
-    // "orc_shaman_run_anim_f",
-    // "orc_warrior_run_anim_f",
-    // "pumpkin_dude_run_anim_f",
-    // "skelet_run_anim_f",
-    // "tiny_zombie_run_anim_f",
     {
       name: "wizzard_f_run_anim_f",
       speed: 1.05,
     },
-    // "wogol_run_anim_f",
-    // "chort_run_anim_f",
-    // "doc_run_anim_f",
   ];
   const index = Math.floor(Math.random() * stats.length);
   return stats[index];
@@ -75,7 +65,6 @@ export class Enemy extends EventEmitter implements VisualElement {
   speed = 1;
   type: string;
   private character: PIXI.AnimatedSprite;
-  private text: PIXI.Text;
   state: EnemyState;
 
   constructor(coordinates: Coordinates, direction: Direction) {
@@ -86,9 +75,7 @@ export class Enemy extends EventEmitter implements VisualElement {
 
     this.id = id++;
     this.coordinates = coordinates;
-    // this.targetCoordinates = coordinates;
     this.direction = direction;
-    this.text = new PIXI.Text(String(this.id));
     this.sprite = new PIXI.Container();
     const stats = getEnemy();
     this.type = stats.name;
@@ -103,27 +90,26 @@ export class Enemy extends EventEmitter implements VisualElement {
   initSprite() {
     this.sprite.addChild(this.character);
     this.character.play();
-    this.character.animationSpeed = 0.15;
+    this.character.animationSpeed = 0.2;
+    this.sprite.width *= 2;
+    this.sprite.height *= 2;
     const { x, y } = this.translateToScreenCoordinates(
       this.targetCoordinates || this.coordinates,
     );
     this.sprite.x = x;
     this.sprite.y = y;
-    this.sprite.width *= 2;
-    this.sprite.height *= 2;
     this.sprite.zIndex = this.coordinates.y;
   }
 
   private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
       x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.sprite.width),
-      y: coordinates.y * TILE_SIZE,
+      y: coordinates.y * TILE_SIZE - 8,// + 0.5 * (this.sprite.height - TILE_SIZE),
     };
   }
 
   tick(delta: number) {
     if (this.targetCoordinates && this.state === "walking") {
-      // this.sprite.zIndex = this.targetCoordinates.y;
       const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
         this.targetCoordinates,
       );

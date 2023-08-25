@@ -85,8 +85,8 @@ export const tiles = [
 ];
 
 let app = new PIXI.Application({
-  width: 2 * tiles[0].length * TILE_SIZE,
-  height: 2 * tiles.length * TILE_SIZE,
+  width: tiles[0].length * TILE_SIZE,
+  height: tiles.length * TILE_SIZE,
 });
 
 const container = document.getElementById("app");

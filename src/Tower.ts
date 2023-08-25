@@ -40,7 +40,6 @@ export class Tower extends EventEmitter implements VisualElement  {
     image.zIndex = this.coordinates.y;
     this.text.zIndex = this.coordinates.y + 1;
     this.sprite.addChild(image);
-    // this.sprite.addChild(this.text);
     this.sprite.x = this.coordinates.x * TILE_SIZE;
     this.sprite.y = this.coordinates.y * TILE_SIZE - 8;
   }
