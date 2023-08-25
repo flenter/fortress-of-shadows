@@ -89,6 +89,15 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   initSprite() {
+    const _initSprite = autometrics({
+      moduleName: "Enemy.ts",
+      functionName: "initSprite",
+    }, this._initSprite.bind(this));
+
+    _initSprite();
+  }
+
+  _initSprite() {
     this.sprite.addChild(this.character);
     this.character.play();
     this.character.animationSpeed = 0.2;
@@ -103,6 +112,15 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
+    const _translateToScreenCoordinates = autometrics({
+      moduleName: "Enemy.ts",
+      functionName: "translateToScreenCoordinates",
+    }, this._translateToScreenCoordinates.bind(this));
+
+    return _translateToScreenCoordinates(coordinates);
+  }
+
+  private _translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
       x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.sprite.width),
       y: coordinates.y * TILE_SIZE - 8, // + 0.5 * (this.sprite.height - TILE_SIZE),
