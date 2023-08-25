@@ -78,11 +78,9 @@ export class Level implements VisualElement {
       this.sprite.height,
     );
     this.sprite.on("pointerdown", (event: FederatedPointerEvent) => {
-      // if (this.state !== "start") {
-      //   return;
-      // }
-      console.log(event);
-      console.log("event", event.global);
+      if (this.state !== "start") {
+        return;
+      }
       const tileX = Math.floor(event.global.x / TILE_SIZE);
       const tileY = Math.floor(event.global.y / TILE_SIZE);
 
@@ -90,9 +88,6 @@ export class Level implements VisualElement {
       if (tile === TileType.None) {
         this.addTower(tileX, tileY);
       }
-      // console.log(tileX, tileY, 'tile', tile);
-      // console.log(event.);
-      // this.coor
     });
   }
 
