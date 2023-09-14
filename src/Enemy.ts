@@ -2,7 +2,7 @@ import { Coordinates, Direction } from "./types";
 import * as PIXI from "pixi.js";
 import { TILE_SIZE } from "./constants";
 import { VisualElement } from "./VisualElement";
-import { autometrics } from "@autometrics/autometrics";
+import { Autometrics } from "@autometrics/autometrics";
 import { EventEmitter } from "@pixi/utils";
 
 let id = 0;
@@ -56,6 +56,7 @@ function getEnemy() {
 
 type EnemyState = "walking" | "dead" | "finished";
 
+@Autometrics({ moduleName: "Enemy.ts" })
 export class Enemy extends EventEmitter implements VisualElement {
   id: number;
   previousCoordinates: Coordinates | undefined;
@@ -89,15 +90,7 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   initSprite() {
-    const _initSprite = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "initSprite",
-    }, this._initSprite.bind(this));
-
-    _initSprite();
-  }
-
-  _initSprite() {
+    console.log(this);
     this.sprite.addChild(this.character);
     this.character.play();
     this.character.animationSpeed = 0.2;
@@ -112,15 +105,6 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
-    const _translateToScreenCoordinates = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "translateToScreenCoordinates",
-    }, this._translateToScreenCoordinates.bind(this));
-
-    return _translateToScreenCoordinates(coordinates);
-  }
-
-  private _translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
       x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.sprite.width),
       y: coordinates.y * TILE_SIZE - 8, // + 0.5 * (this.sprite.height - TILE_SIZE),
@@ -128,15 +112,6 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   tick(delta: number) {
-    const _tick = autometrics(
-      { moduleName: "Enemy.ts", functionName: "tick" },
-      this._tick.bind(this),
-    );
-
-    _tick(delta);
-  }
-
-  _tick(delta: number) {
     if (this.targetCoordinates && this.state === "walking") {
       const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
         this.targetCoordinates,
@@ -182,44 +157,17 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   setNextPosition(nextCoordinates: Coordinates, nextDirection: Direction) {
-    const _setNextPosition = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "setNextPosition",
-    }, this._setNextPosition.bind(this));
-
-    _setNextPosition(nextCoordinates, nextDirection);
-  }
-
-  _setNextPosition(nextCoordinates: Coordinates, nextDirection: Direction) {
     this.previousCoordinates = this.coordinates;
     this.targetCoordinates = nextCoordinates;
     this.direction = nextDirection;
   }
 
   finished() {
-    const _finished = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "finished",
-    }, this._finished.bind(this));
-
-    _finished();
-  }
-
-  _finished() {
     this.state = "finished";
     this.character.animationSpeed = 0;
   }
 
   damage() {
-    const _damage = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "damage",
-    }, this._damage.bind(this));
-
-    _damage();
-  }
-
-  _damage() {
     this.state = "dead";
     this.character.alpha = 0.5;
     this.character.animationSpeed = 0;
