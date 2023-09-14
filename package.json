@@ -24,7 +24,9 @@
     "@pixi/sound": "^5.2.1",
     "@pixi/tilemap": "^4.0.0",
     "@pixi/utils": "^7.2.4",
-    "autometrics": "../autometrics-ts/packages/lib",
+    "@autometrics/autometrics": "../autometrics-ts/packages/autometrics",
+    "@autometrics/exporter-prometheus": "../autometrics-ts/packages/exporter-prometheus",
+    "@autometrics/exporter-prometheus-push-gateway": "../autometrics-ts/packages/exporter-prometheus-push-gateway",
     "pixi.js": "^7.2.4"
   }
 }

@@ -1,11 +1,12 @@
-import { autometrics, init as initAutometrics } from "autometrics";
+import { autometrics } from "@autometrics/autometrics";
+import { init as initAutometrics } from "@autometrics/exporter-prometheus-push-gateway";
 import * as PIXI from "pixi.js";
 
 import { Level } from "./Level";
 import { tiles } from "./main";
 
 initAutometrics({
-  pushGateway: "http://127.0.0.1:6789/pushgateway/metrics/job/td",
+  url: "http://127.0.0.1:6789/pushgateway/metrics/job/td",
   buildInfo: {
     version: import.meta.env.VITE_AUTOMETRICS_VERSION,
     commit: import.meta.env.VITE_AUTOMETRICS_COMMIT,

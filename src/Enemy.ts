@@ -2,7 +2,7 @@ import { Coordinates, Direction } from "./types";
 import * as PIXI from "pixi.js";
 import { TILE_SIZE } from "./constants";
 import { VisualElement } from "./VisualElement";
-import { autometrics } from "autometrics";
+import { autometrics } from "@autometrics/autometrics";
 import { EventEmitter } from "@pixi/utils";
 
 let id = 0;

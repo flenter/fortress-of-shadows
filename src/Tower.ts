@@ -4,7 +4,7 @@ import { TILE_SIZE } from "./constants";
 import { Coordinates } from "./types";
 import * as PIXI from "pixi.js";
 import { sound } from "@pixi/sound";
-import { autometrics } from "autometrics";
+import { autometrics } from "@autometrics/autometrics";
 import { EventEmitter } from "@pixi/utils";
 
 const RANGE = 1;
