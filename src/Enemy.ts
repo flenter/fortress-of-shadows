@@ -90,7 +90,6 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   initSprite() {
-    console.log(this);
     this.sprite.addChild(this.character);
     this.character.play();
     this.character.animationSpeed = 0.2;
