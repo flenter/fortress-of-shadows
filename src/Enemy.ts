@@ -2,7 +2,7 @@ import { Coordinates, Direction } from "./types";
 import * as PIXI from "pixi.js";
 import { TILE_SIZE } from "./constants";
 import { VisualElement } from "./VisualElement";
-import { autometrics } from "autometrics";
+import { Autometrics } from "@autometrics/autometrics";
 import { EventEmitter } from "@pixi/utils";
 import { ProgressBar } from "./ProgressBar";
 
@@ -23,42 +23,42 @@ function getEnemy() {
     {
       name: "big_zombie_run_anim_f",
       speed: 0.25,
-      health: 1
+      health: 1,
     },
     {
       name: "elf_m_run_anim_f",
       speed: 1.1,
-      health: 1
+      health: 1,
     },
     {
       name: "slug_anim_f",
       speed: 0.1,
-      health: 4
+      health: 4,
     },
     {
       name: "goblin_run_anim_f",
       speed: 1,
-      health: 1
+      health: 1,
     },
     {
       name: "knight_m_run_anim_f",
       speed: 0.9,
-      health: 4
+      health: 4,
     },
     {
       name: "lizard_f_run_anim_f",
       speed: 1.2,
-      health: 3
+      health: 3,
     },
     {
       name: "ogre_run_anim_f",
       speed: 1,
-      health: 3
+      health: 3,
     },
     {
       name: "wizzard_f_run_anim_f",
       speed: 1.05,
-      health: 2
+      health: 2,
     },
   ];
   const index = Math.floor(Math.random() * stats.length);
@@ -67,6 +67,7 @@ function getEnemy() {
 
 type EnemyState = "walking" | "dead" | "finished";
 
+@Autometrics({ moduleName: "Enemy.ts" })
 export class Enemy extends EventEmitter implements VisualElement {
   id: number;
   previousCoordinates: Coordinates | undefined;
@@ -104,20 +105,11 @@ export class Enemy extends EventEmitter implements VisualElement {
     this.bar = new ProgressBar({
       width: 20,
       progress: 100,
-    })
+    });
     this.initSprite();
   }
 
   initSprite() {
-    const _initSprite = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "initSprite",
-    }, this._initSprite.bind(this));
-
-    _initSprite();
-  }
-
-  _initSprite() {
     this.sprite.addChild(this.character);
     this.character.play();
     this.character.animationSpeed = 0.2;
@@ -133,15 +125,6 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   private translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
-    const _translateToScreenCoordinates = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "translateToScreenCoordinates",
-    }, this._translateToScreenCoordinates.bind(this));
-
-    return _translateToScreenCoordinates(coordinates);
-  }
-
-  private _translateToScreenCoordinates(coordinates: Coordinates): Coordinates {
     return {
       x: coordinates.x * TILE_SIZE + 0.5 * (TILE_SIZE - this.character.width),
       y: coordinates.y * TILE_SIZE - 8, // + 0.5 * (this.character.height - TILE_SIZE),
@@ -149,15 +132,6 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   tick(delta: number) {
-    const _tick = autometrics(
-      { moduleName: "Enemy.ts", functionName: "tick" },
-      this._tick.bind(this),
-    );
-
-    _tick(delta);
-  }
-
-  _tick(delta: number) {
     if (this.targetCoordinates && this.state === "walking") {
       const { x: targetX, y: targetY } = this.translateToScreenCoordinates(
         this.targetCoordinates,
@@ -203,47 +177,19 @@ export class Enemy extends EventEmitter implements VisualElement {
   }
 
   setNextPosition(nextCoordinates: Coordinates, nextDirection: Direction) {
-    const _setNextPosition = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "setNextPosition",
-    }, this._setNextPosition.bind(this));
-
-    _setNextPosition(nextCoordinates, nextDirection);
-  }
-
-  _setNextPosition(nextCoordinates: Coordinates, nextDirection: Direction) {
     this.previousCoordinates = this.coordinates;
     this.targetCoordinates = nextCoordinates;
     this.direction = nextDirection;
   }
 
   finished() {
-    const _finished = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "finished",
-    }, this._finished.bind(this));
-
-    _finished();
-  }
-
-  _finished() {
     this.state = "finished";
     this.character.animationSpeed = 0;
   }
 
   damage(amount: number): boolean {
-    
-    const _damage = autometrics({
-      moduleName: "Enemy.ts",
-      functionName: "damage",
-    }, this._damage.bind(this));
-
-    return _damage(amount);
-  }
-
-  _damage(amount: number): boolean {
-    this.health -= amount;  
-    this.bar.progress =this.health / this.maxHealth * 100;
+    this.health -= amount;
+    this.bar.progress = this.health / this.maxHealth * 100;
     if (this.health > 0) {
       return false;
     }

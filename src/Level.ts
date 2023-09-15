@@ -1,4 +1,4 @@
-import { autometrics } from "autometrics";
+import { autometrics } from "@autometrics/autometrics";
 import {
   Application,
   Container,
@@ -59,9 +59,7 @@ export class Level implements VisualElement {
     this._tick = autometrics(
       { moduleName: "Level.ts", functionName: "tick" },
       this.tick.bind(this),
-    ),
-
-    this.initSprite();
+    ), this.initSprite();
 
     this.text = new Text();
     this.text.text = "GAME OVER";
