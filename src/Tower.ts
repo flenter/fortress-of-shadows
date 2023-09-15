@@ -84,9 +84,12 @@ export class Tower extends EventEmitter implements VisualElement {
 
   private fire(target: Enemy, currentTime: number) {
     sound.play(this.getRandomSample(), {});
-    target.damage();
+    const isDead = target.damage(1);
     this.lastFired = currentTime;
-    this.kills++;
+    if (isDead) {
+      this.kills++;
+    }
+
     this.emit("fire", {
       target,
       tower: this,
