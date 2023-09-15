@@ -25,6 +25,9 @@
     "@opentelemetry/exporter-prometheus" ">=0.41.2"
     "@opentelemetry/sdk-metrics" ">=1.15.0"
 
+"@autometrics/typescript-plugin@../autometrics-ts/packages/typescript-plugin":
+  version "0.6.0-beta"
+
 "@esbuild/android-arm64@0.18.20":
   version "0.18.20"
   resolved "https://registry.yarnpkg.com/@esbuild/android-arm64/-/android-arm64-0.18.20.tgz#984b4f9c8d0377443cc2dfcef266d02244593622"
